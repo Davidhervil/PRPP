@@ -5,31 +5,59 @@
 #define pb push_back
 #define mp make_pair
 using namespace std;
-void dfs(int s,vector<vector<pair <int,int> > > *graph, vector<int> *conexComp){
-	vector<int> visited(200,0);
+typedef vector<pair<int,int> > connections;
+typedef vector<vector<pair <int,int> > > Graph;
+typedef struct edgy
+{
+	int v1,v2,cost,value;
+}Edge;
+
+/* 	Este dfs modifica conexComp quedando con las listas de los nodos que componen
+	cada componente conexa del grafo graph.
+*/
+void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
+	int visited[nodes+1],done[nodes+1];
+	int remain = nodes, verify = 1, comp = 0, node;
 	stack<int> stack;
-	stack.push(s);
-	int node;
 	cout<<"Let's roll"<<endl;
-	while(!stack.empty()){
-		node = stack.top();
-		stack.pop();
-		if(!visited[node]){
-			cout<<"Rolling"<<endl;
-			(*conexComp).pb(node);
-			visited[node]=1;
-			for(int i=1; i<(*graph)[node].size();i++){
-				if((*graph)[node][i].cost!=-1){
-					stack.push(i);
+
+	(*conexComp).pb(vector<int> ());
+	memset(done,0,sizeof(done));
+	stack.push(s);
+	while(remain){
+		memset(visited,0,sizeof(visited));
+		while(!stack.empty()){
+			node = stack.top();
+			stack.pop();
+			if(!visited[node]){
+				cout<<"Rolling"<<endl;
+				(*conexComp)[comp].pb(node);
+				visited[node] = 1;
+				done[node] = 1;
+				remain--;
+				for(int i=1; i<(*graph)[node].size();i++){
+					if((*graph)[node][i].cost!=-1){
+						stack.push(i);
+					}
 				}
 			}
 		}
+		while(verify<=nodes && done[verify]==1){
+			verify++;
+		}
+		cout<<"Verifying"<<endl;
+		if(verify<=nodes){
+			stack.push(verify);
+			//cout<<verify<<endl;
+			(*conexComp).pb(vector<int> ());
+			comp++;
+		}
 	}
-
+	cout<<"Rolled"<<endl;
 }
 int main(){
-	vector<vector<pair<int,int> > > graph(200,vector<pair<int,int> >(200,mp(-1,-1)));
-	vector<int> conexComp;
+	Graph graph(200,connections(200,mp(-1,-1)));
+	vector<vector<int> > conexComp;
 	int nodes,edges,cost,value,v1,v2,d;
 	cin>>nodes>>edges>>d;
 	for(int i=0; i<edges; i++){
@@ -38,14 +66,20 @@ int main(){
 		graph[v2][v1] = mp(cost,value);
 	}
 	cout<<"Leido"<<endl;
-	dfs(d,&graph, &conexComp);
+	dfs(d,&graph, &conexComp,nodes); //Notar que en conexComp[0] estara V0
 	cout<<"Recorrido"<<endl;
 	vector<int> printed(200,0);
-	for(int i=0; i<conexComp.size(); i++){
-		printed[conexComp[i]]=1;
-		for(int j=1; j<graph[conexComp[i]].size(); j++){
-			if(graph[conexComp[i]][j].cost!=-1 && printed[j]==0 )
-			cout<<conexComp[i]<<' '<<j<<' '<<graph[conexComp[i]][j].cost<<' '<<graph[conexComp[i]][j].value<<endl;
+	int c = 0;
+	for(vector<vector<int> >::iterator comp = conexComp.begin();
+		comp!=conexComp.end(); ++comp,c++)
+	{	
+		cout<<"Componente "<< c << endl;
+		for(int i=0;i<comp->size();i++){
+			printed[(*comp)[i]]=1;
+			for(int j=1; j<graph[(*comp)[i]].size(); j++){
+				if(graph[(*comp)[i]][j].cost!=-1 && printed[j]==0 )
+				cout<<(*comp)[i]<<' '<<j<<' '<<graph[(*comp)[i]][j].cost<<' '<<graph[(*comp)[i]][j].value<<endl;
+			}
 		}
 	}
 
