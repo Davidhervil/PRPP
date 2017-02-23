@@ -4,6 +4,7 @@
 #define value second
 #define pb push_back
 #define mp make_pair
+#define depo 1
 using namespace std;
 typedef vector<pair<int,int> > connections;
 typedef vector<vector<pair <int,int> > > Graph;
@@ -57,30 +58,49 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 }
 int main(){
 	Graph graph(200,connections(200,mp(-1,-1)));
-	vector<vector<int> > conexComp;
-	int nodes,edges,cost,value,v1,v2,d;
-	cin>>nodes>>edges>>d;
-	for(int i=0; i<edges; i++){
-		cin>>v1>>v2>>cost>>value;
+	Graph Gr(200,connections(200,mp(-1,-1)));
+	vector<vector<int> > CkR;
+	vector<int> BCk;
+	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
+	scanf("number of vertices :  %d \n",&nodes);
+	scanf("number of required edges  %d \n",&edgesR);
+	for(int i=0; i<edgesR; i++){
+		scanf("%d %d %d %d \n",&v1,&v2,&cost,&value);
+		cout<<v1<<' '<<v2<<' '<<cost<<' '<<value<<endl;
+		if(v1 == 1 || v2== 1)dinR=1;
+		graph[v1][v2] = mp(cost,value);
+		graph[v2][v1] = mp(cost,value);
+		Gr[v1][v2] = mp(cost,value);
+		Gr[v2][v1] = mp(cost,value);
+	}
+	scanf("number of non required edges  %d \n",&nedgesR);
+	for(int i=0; i<nedgesR; i++){
+		scanf("%d %d %d %d \n",&v1,&v2,&cost,&value);
+		cout<<v1<<' '<<v2<<' '<<cost<<' '<<value<<endl;
 		graph[v1][v2] = mp(cost,value);
 		graph[v2][v1] = mp(cost,value);
 	}
 	cout<<"Leido"<<endl;
-	dfs(d,&graph, &conexComp,nodes); //Notar que en conexComp[0] estara V0
+	if(dinR)//CkR[0] esta en solucion
+	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0
+	BCk.resize(CkR.size(),0);
 	cout<<"Recorrido"<<endl;
 	vector<int> printed(200,0);
 	int c = 0;
-	for(vector<vector<int> >::iterator comp = conexComp.begin();
-		comp!=conexComp.end(); ++comp,c++)
+	for(vector<vector<int> >::iterator comp = CkR.begin();
+		comp!=CkR.end(); ++comp,c++)
 	{	
 		cout<<"Componente "<< c << endl;
 		for(int i=0;i<comp->size();i++){
 			printed[(*comp)[i]]=1;
-			for(int j=1; j<graph[(*comp)[i]].size(); j++){
-				if(graph[(*comp)[i]][j].cost!=-1 && printed[j]==0 )
-				cout<<(*comp)[i]<<' '<<j<<' '<<graph[(*comp)[i]][j].cost<<' '<<graph[(*comp)[i]][j].value<<endl;
+			for(int j=1; j<Gr[(*comp)[i]].size(); j++){
+				if(Gr[(*comp)[i]][j].cost!=-1 && printed[j]==0 ){
+					BCk[c] += Gr[(*comp)[i]][j].value - Gr[(*comp)[i]][j].cost;
+					cout<<(*comp)[i]<<' '<<j<<' '<<Gr[(*comp)[i]][j].cost<<' '<<Gr[(*comp)[i]][j].value<<endl;
+				}
 			}
 		}
+		cout<<"Beneficio: "<<BCk[c]<<endl;
 	}
 
 }
