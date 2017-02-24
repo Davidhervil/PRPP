@@ -17,10 +17,10 @@ typedef struct edgy
 }Edge;
 
 class mycomparison
-{
+{  Graph *G;
 public:
-  mycomparison()
-    {}
+  mycomparison(Graph *g)
+    {G = g; }
   bool operator() (const pair<int,int>&v1, pair<int,int>&v2) const
   { //par(vertice,distancia)
     return (v1.second < v2.second);
@@ -71,11 +71,21 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 	cout<<"Rolled"<<endl;
 }
 
-void dijkstra(int s, Graph *graph, vector<vector<int> > *CkR, vector<int> *camino){
-	priority_queue<pair<int,int>,vector<pair<int,int> >,mycomparison> q;
+void bellman(int nodes,int s, Graph *graph, vector<vector<int> > *CkR, vector<int> *prev){
+	int turbo_paths[110][110][110];
+	vector<int> distances(110,INF);
+	distances[1] = 0;
+	for (int node = 0; node <= nodes; node++)
+	{
+		for(int i=1; i<(*graph)[node].size();i++){
+			if((*graph)[node][i].cost!=-1 && distances[]){
+				distances[i] = 
+			}
+		}
+	}
 }
 
-void bestCompCost(int d, Graph *graph, vector<vector<int> > *CkR, vector<int> *camino){
+void bestCompCost(int d, Graph *graph, vector<vector<int> > *CkR, vector<int> *prev){
 
 }
 void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)[110][110], Graph *g){
@@ -125,7 +135,7 @@ int main(){
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
 	int costResult[110][110],beneResult[110][110],benePaths[110][110];
 	vector<vector<int> > CkR;
-	vector<int> BCk,camino;
+	vector<int> BCk,prevs(110,-1);
 	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
 	int bestCompDijk,bestCompB;
 	for(int i=0;i<110;i++){
