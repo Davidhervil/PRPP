@@ -34,7 +34,7 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 	int visited[nodes+1],done[nodes+1];
 	int remain = nodes, verify = 1, comp = 0, node;
 	stack<int> stack;
-	cout<<"Let's roll"<<endl;
+	//cout<<"Let's roll"<<endl;
 
 	(*conexComp).pb(vector<int> ());
 	memset(done,0,sizeof(done));
@@ -45,7 +45,7 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 			node = stack.top();
 			stack.pop();
 			if(!visited[node]){
-				cout<<"Rolling"<<endl;
+				//cout<<"Rolling"<<endl;
 				(*conexComp)[comp].pb(node);
 				visited[node] = 1;
 				done[node] = 1;
@@ -60,7 +60,7 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 		while(verify<=nodes && done[verify]==1){
 			verify++;
 		}
-		cout<<"Verifying"<<endl;
+		//cout<<"Verifying"<<endl;
 		if(verify<=nodes){
 			stack.push(verify);
 			//cout<<verify<<endl;
@@ -78,18 +78,45 @@ void dijkstra(int s, Graph *graph, vector<vector<int> > *CkR, vector<int> *camin
 void bestCompCost(int d, Graph *graph, vector<vector<int> > *CkR, vector<int> *camino){
 
 }
-void floydWarshall(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)[110][110], Graph *g){
-	for(int i = 1;i<nodes;i++){
-		for(int j=1; j<nodes;i++){
+void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)[110][110], Graph *g){
+	cout<<"Empezando"<<endl;
+	for(int i = 1;i<=nodes;i++){
+		for(int j= 1; j<=nodes;j++){
+			(*cP)[i][j] = -1;
 			if(j==i){
 				(*cR)[j][j] = 0;
 			}
 			else{
 				if((*g)[i][j].cost!=-1){
 					(*cR)[i][j] = (*cR)[j][i] = (*g)[i][j].cost;
+					(*cP)[i][j] = j;
+				}else{
+					(*cR)[i][j] = INF;
 				}
 			}
 		}
+	}
+	cout<<"Floydeando"<<endl;
+	for (int k = 1; k <= nodes; k++)
+	{	
+		for (int i = 1; i <= nodes; i++)
+		{
+			for (int j = 1; j < nodes; j++)
+			{
+				if((*cR)[i][j]>(*cR)[i][k]+(*cR)[k][j]){
+					(*cR)[i][j] = (*cR)[i][k]+(*cR)[k][j];
+					(*cP)[i][j] = (*cP)[i][k];
+				}
+			}
+		}
+	}
+}
+void leprint (int nodes,int (*cR)[110][110]){
+	for(int i = 1;i<=nodes;i++){
+		for(int j=1; j<=nodes;j++){
+			cout<<(*cR)[i][j]<<' ';
+		}
+		cout<<endl;
 	}
 }
 int main(){
@@ -132,7 +159,9 @@ int main(){
 		bene4Floyd[v1][v2] = bene4Floyd[v2][v1] = cost - value;
 	}
 	cout<<"Leido"<<endl;
-	floydWarshall(nodes,&graphFloyd,&costResult,&costPaths, &graph);
+	fldWrshllC(nodes,&graphFloyd,&costResult,&costPaths,&graph);
+	cout<<"fldWrshllC Listo"<<endl;
+	leprint(nodes,&costResult);
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
 	else{
