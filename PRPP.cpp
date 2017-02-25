@@ -71,18 +71,29 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 	cout<<"Rolled"<<endl;
 }
 
-void bellman(int nodes,int s, Graph *graph, vector<vector<int> > *CkR, vector<int> *prev){
-	int turbo_paths[110][110][110];
-	vector<int> distances(110,INF);
-	distances[1] = 0;
-	for (int node = 0; node <= nodes; node++)
+vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
+	int turbo_paths[105][105][105];
+	vector<int> distances(110,-INF);
+	distances[s] = 0;
+	cout<<"Holis"<<endl;
+	memset(turbo_paths,-1,sizeof(turbo_paths));
+	for (int node = 1; node <= nodes-1; node++)
 	{
-		for(int i=1; i<(*graph)[node].size();i++){
-			if((*graph)[node][i].cost!=-1 && distances[]){
-				distances[i] = 
-			}
+		for(int i=1; i<=nodes;i++){
+			for (int j = 1; i <=nodes; j++)
+			{	
+				cout<<i<<' '<<j<<endl;
+			 	if((*graph)[i][j].cost!=-1 && distances[j] < distances[i] + (-1)*turbo_paths[j][i][j]*(*graph)[i][j].value-(*graph)[i][j].cost){
+					
+					distances[j] = distances[i] + (-1)*turbo_paths[j][i][j]*(*graph)[i][j].value-(*graph)[i][j].cost;
+					turbo_paths[j][i][j] = turbo_paths[j][j][i] = 0;
+					(*prev)[j] = i;
+				}
+
+			 } 
 		}
 	}
+	return distances;
 }
 
 void bestCompCost(int d, Graph *graph, vector<vector<int> > *CkR, vector<int> *prev){
@@ -111,7 +122,7 @@ void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)
 	{	
 		for (int i = 1; i <= nodes; i++)
 		{
-			for (int j = 1; j < nodes; j++)
+			for (int j = 1; j <= nodes; j++)
 			{
 				if((*cR)[i][j]>(*cR)[i][k]+(*cR)[k][j]){
 					(*cR)[i][j] = (*cR)[i][k]+(*cR)[k][j];
@@ -135,7 +146,7 @@ int main(){
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
 	int costResult[110][110],beneResult[110][110],benePaths[110][110];
 	vector<vector<int> > CkR;
-	vector<int> BCk,prevs(110,-1);
+	vector<int> BCk,prevs(110,-1),bellResult;
 	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
 	int bestCompDijk,bestCompB;
 	for(int i=0;i<110;i++){
@@ -172,10 +183,14 @@ int main(){
 	fldWrshllC(nodes,&graphFloyd,&costResult,&costPaths,&graph);
 	cout<<"fldWrshllC Listo"<<endl;
 	leprint(nodes,&costResult);
+	cout<<"Vamos con Bell"<<endl;
+	bellResult=bellman(nodes,depo,&graph, &prevs);
+	for(int i=1;i<=nodes;i++)cout<<bellResult[i]<<' ';
+		cout<<endl;
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
 	else{
-		bestCompCost(depo, &graph, &CkR, &camino);
+		bestCompCost(depo, &graph, &CkR, &prevs);
 	}
 	BCk.resize(CkR.size(),0);
 	cout<<"Recorrido"<<endl;
