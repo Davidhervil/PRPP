@@ -72,21 +72,24 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 }
 
 vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
-	int turbo_paths[105][105][105];
-	vector<int> distances(110,-INF);
+	int valid[110][110];
+	vector<int> distances(nodes+1,-INF);
 	distances[s] = 0;
 	cout<<"Holis"<<endl;
-	memset(turbo_paths,-1,sizeof(turbo_paths));
+	memset(valid,-1,sizeof(valid));
+	distances[1] = 0;
+	cout<<"WTF "<<distances[11]<<endl;
 	for (int node = 1; node <= nodes-1; node++)
 	{
 		for(int i=1; i<=nodes;i++){
-			for (int j = 1; i <=nodes; j++)
+			for (int j = 1; j <=nodes; j++)
 			{	
-				cout<<i<<' '<<j<<endl;
-			 	if((*graph)[i][j].cost!=-1 && distances[j] < distances[i] + (-1)*turbo_paths[j][i][j]*(*graph)[i][j].value-(*graph)[i][j].cost){
-					
-					distances[j] = distances[i] + (-1)*turbo_paths[j][i][j]*(*graph)[i][j].value-(*graph)[i][j].cost;
-					turbo_paths[j][i][j] = turbo_paths[j][j][i] = 0;
+			 	if((*graph)[i][j].cost!=-1 && valid[i][j]!=0 &&
+			 		distances[j] < distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost){	
+					distances[j] = distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost;
+					cout<<"i "<<i<<' '<<distances[i]<<endl;
+					cout<<"j "<<j<<' '<<distances[j]<<endl;
+					valid[i][j] = valid[j][i] = 0;
 					(*prev)[j] = i;
 				}
 
@@ -140,6 +143,24 @@ void leprint (int nodes,int (*cR)[110][110]){
 		cout<<endl;
 	}
 }
+int findmax(vector<int> v){
+	int max=v[0],holis;
+	for(int i=0;i<v.size();i++){
+		if(v[i]>=max){
+			max=v[i];
+			holis=i;
+			}
+	}
+	return holis;
+}
+void printpath(vector<int> prv, int max){
+	int i = max;
+	while(prv[i]!=-1){
+		cout<<i<<' ';
+		i = prv[i];
+	}
+	cout<<i<<endl;
+}
 int main(){
 	Graph graph(110,connections(110,mp(-1,-1)));
 	Graph Gr(110,connections(110,mp(-1,-1)));
@@ -148,7 +169,7 @@ int main(){
 	vector<vector<int> > CkR;
 	vector<int> BCk,prevs(110,-1),bellResult;
 	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
-	int bestCompDijk,bestCompB;
+	int bestCompDijk,bestCompB,max;
 	for(int i=0;i<110;i++){
 
 		memset(graphFloyd[i],0,sizeof(graphFloyd[i]));
@@ -187,6 +208,8 @@ int main(){
 	bellResult=bellman(nodes,depo,&graph, &prevs);
 	for(int i=1;i<=nodes;i++)cout<<bellResult[i]<<' ';
 		cout<<endl;
+	max = findmax(bellResult);
+	printpath(prevs,max);
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
 	else{
