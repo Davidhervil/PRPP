@@ -124,60 +124,60 @@ void mark(int from, vector<int> *p,int (*inroad)[110][110] ){
 		i = (*p)[i];
 	}
 }
-vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *prvs){
+vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<int> *prev){
 	int valid[110][110],inroad[110][110],hold;
-	vector<int> distances(nodes+1,-INF),prev(110,-1);
+	vector<int> distances(nodes+1,-INF);
 	distances[from] = 0;
 	cout<<"Empezando Regreso"<<endl;
 	memset(inroad,-1,sizeof(inroad));
-	mark(from,prvs,&inroad);
+	mark(from,ida,&inroad);
 	memset(valid,-1,sizeof(valid));
 	for (int node = 1; node <= nodes-1; node++)
 	{
-		 for(int i=1; i<=nodes;i++){
+		 for(int i=from; i<=nodes;i++){
 			for (int j = 1; j <=nodes; j++)
 			{	
 			 	if((*graph)[i][j].cost!=-1 && valid[i][j]!=0 &&
 			 		distances[j] < distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost){	
-					hold = prev[j];
-					prev[j] = i;
-					if(!infinite(&prev,i)){
+					hold = (*prev)[j];
+					(*prev)[j] = i;
+					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost;
 						//cout<<"i "<<i<<' '<<distances[i]<<endl;
 						//cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = inroad[i][j] = inroad[j][i]= 0;
-						prev[j] = i;
+						(*prev)[j] = i;
 					}else{
-						prev[j] = hold;
+						(*prev)[j] = hold;
 					}
 				}
 
 			}
 		}
-		/*for(int i=1; i<from;i++){
+		for(int i=1; i<from;i++){
 			for (int j = 1; j <=nodes; j++)
 			{	
 			 	if((*graph)[i][j].cost!=-1 && valid[i][j]!=0 &&
 			 		distances[j] < distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost){	
-					hold = prev[j];
-					prev[j] = i;
-					if(!infinite(&prev,i)){
+					hold = (*prev)[j];
+					(*prev)[j] = i;
+					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost;
 						//cout<<"i "<<i<<' '<<distances[i]<<endl;
 						//cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = inroad[i][j] = inroad[j][i]= 0;
-						prev[j] = i;
+						(*prev)[j] = i;
 					}else{
-						prev[j] = hold;
+						(*prev)[j] = hold;
 					}
 				}
 
 			}
-		}*/
+		}
 	}
-	for(int i=1;i<=nodes;i++)cout<<distances[i]<<' ';
-		cout<<endl;
-	return prev;
+	//for(int i=1;i<=nodes;i++)cout<<distances[i]<<' ';
+	//	cout<<endl;
+	return distances;
 }
 void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)[110][110], Graph *g){
 	cout<<"Empezando"<<endl;
@@ -239,14 +239,15 @@ void printpath(vector<int> prv, int max){
 	cout<<i<<endl;
 }
 int main(){
-	Graph graph(110,connections(110,mp(-1,-1)));
-	Graph Gr(110,connections(110,mp(-1,-1)));
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
 	int costResult[110][110],beneResult[110][110],benePaths[110][110];
+	Graph graph(110,connections(110,mp(-1,-1)));
+	Graph Gr(110,connections(110,mp(-1,-1)));
 	vector<vector<int> > CkR;
-	vector<int> BCk,prevs(110,-1),bellResult,back;
+	vector<int> BCk,prevs(110,-1),bellResult,backResult,backprevs(110,-1);
+	vector<int> bestbackpath;
 	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
-	int bestCompDijk,bestCompB,max;
+	int bestCompDijk,bestCompB,max,best;
 	for(int i=0;i<110;i++){
 
 		memset(graphFloyd[i],0,sizeof(graphFloyd[i]));
@@ -285,10 +286,25 @@ int main(){
 	bellResult=bellman(nodes,depo,&graph, &prevs);
 	for(int i=1;i<=nodes;i++)cout<<bellResult[i]<<' ';
 		cout<<endl;
-	max = findmax(bellResult);
-	printpath(prevs,max);
-	back = regreso(nodes,max,&graph,&prevs);
-	printpath(back,1);
+	//max = findmax(bellResult);
+	//printpath(prevs,max);
+	backResult = regreso(nodes,2,&graph,&prevs,&backprevs);
+	max = bellResult[2] + backResult[1];
+	best = 2;
+	bestbackpath = backprevs;
+	for (int i = 3; i <= nodes; ++i)
+	{	
+		fill(backprevs.begin(),backprevs.end(),-1);
+		backResult = regreso(nodes,i,&graph,&prevs,&backprevs);
+		if(max<bellResult[i]+backResult[1]){
+			max=bellResult[i]+backResult[1];
+			best = i;
+			bestbackpath = backprevs;
+		}
+	}
+	printpath(prevs,best);
+	printpath(bestbackpath,1);
+	cout<<max<<endl;
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
 	else{
