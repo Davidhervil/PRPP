@@ -70,27 +70,43 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 	}
 	cout<<"Rolled"<<endl;
 }
-
+int infinite( vector<int> *prev,int from){
+	int i = from,cycle=0;
+	while((*prev)[i]!=-1){
+		//cout<<i<<' ';
+		i = (*prev)[i];
+		if(i==from){
+			cycle=1;
+			break;
+		}
+	}
+	return cycle;
+	//cout<<i<<endl;
+}
 vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
-	int valid[110][110];
+	int valid[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[s] = 0;
-	cout<<"Holis"<<endl;
+	cout<<"Empezando Bell"<<endl;
 	memset(valid,-1,sizeof(valid));
-	distances[1] = 0;
-	cout<<"WTF "<<distances[11]<<endl;
 	for (int node = 1; node <= nodes-1; node++)
 	{
-		for(int i=1; i<=nodes;i++){
+		 for(int i=1; i<=nodes;i++){
 			for (int j = 1; j <=nodes; j++)
 			{	
 			 	if((*graph)[i][j].cost!=-1 && valid[i][j]!=0 &&
 			 		distances[j] < distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost){	
-					distances[j] = distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost;
-					cout<<"i "<<i<<' '<<distances[i]<<endl;
-					cout<<"j "<<j<<' '<<distances[j]<<endl;
-					valid[i][j] = valid[j][i] = 0;
+					hold = (*prev)[j];
 					(*prev)[j] = i;
+					if(!infinite(prev,i)){
+						distances[j] = distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost;
+						//cout<<"i "<<i<<' '<<distances[i]<<endl;
+						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						valid[i][j] = valid[j][i] = 0;
+						(*prev)[j] = i;
+					}else{
+						(*prev)[j] = hold;
+					}
 				}
 
 			 } 
@@ -99,8 +115,36 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
 	return distances;
 }
 
-void bestCompCost(int d, Graph *graph, vector<vector<int> > *CkR, vector<int> *prev){
+void regreso(int nodes,int from, Graph *graph, vector<int> *prevs){
+	int valid[110][110],inroad[110][110],hold;
+	vector<int> distances(nodes+1,-INF);
+	distances[from] = 0;
+	cout<<"Empezando Bell"<<endl;
+	memset(valid,-1,sizeof(valid));
+	memset(inroad,0,sizeof(inroad));
+	for (int node = 1; node <= nodes-1; node++)
+	{
+		 for(int i=1; i<=nodes;i++){
+			for (int j = 1; j <=nodes; j++)
+			{	
+			 	if((*graph)[i][j].cost!=-1 && valid[i][j]!=0 &&
+			 		distances[j] < distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost){	
+					hold = (*prev)[j];
+					(*prev)[j] = i;
+					if(!infinite(prev,i)){
+						distances[j] = distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost;
+						//cout<<"i "<<i<<' '<<distances[i]<<endl;
+						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						valid[i][j] = valid[j][i] = 0;
+						(*prev)[j] = i;
+					}else{
+						(*prev)[j] = hold;
+					}
+				}
 
+			 } 
+		}
+	}
 }
 void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)[110][110], Graph *g){
 	cout<<"Empezando"<<endl;
