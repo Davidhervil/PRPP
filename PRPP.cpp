@@ -115,36 +115,69 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
 	return distances;
 }
 
-void regreso(int nodes,int from, Graph *graph, vector<int> *prevs){
+void mark(int from, vector<int> *p,int (*inroad)[110][110] ){
+	int i = from,cycle=0;
+	while((*p)[i]!=-1){
+		//cout<<i<<' ';
+		if((*p)[i]!=-1)
+		(*inroad)[i][(*p)[i]] = (*inroad)[(*p)[i]][i] = 0; 
+		i = (*p)[i];
+	}
+}
+vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *prvs){
 	int valid[110][110],inroad[110][110],hold;
-	vector<int> distances(nodes+1,-INF);
+	vector<int> distances(nodes+1,-INF),prev(110,-1);
 	distances[from] = 0;
-	cout<<"Empezando Bell"<<endl;
+	cout<<"Empezando Regreso"<<endl;
+	memset(inroad,-1,sizeof(inroad));
+	mark(from,prvs,&inroad);
 	memset(valid,-1,sizeof(valid));
-	memset(inroad,0,sizeof(inroad));
 	for (int node = 1; node <= nodes-1; node++)
 	{
 		 for(int i=1; i<=nodes;i++){
 			for (int j = 1; j <=nodes; j++)
 			{	
 			 	if((*graph)[i][j].cost!=-1 && valid[i][j]!=0 &&
-			 		distances[j] < distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost){	
-					hold = (*prev)[j];
-					(*prev)[j] = i;
-					if(!infinite(prev,i)){
-						distances[j] = distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost;
+			 		distances[j] < distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost){	
+					hold = prev[j];
+					prev[j] = i;
+					if(!infinite(&prev,i)){
+						distances[j] = distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost;
 						//cout<<"i "<<i<<' '<<distances[i]<<endl;
 						//cout<<"j "<<j<<' '<<distances[j]<<endl;
-						valid[i][j] = valid[j][i] = 0;
-						(*prev)[j] = i;
+						valid[i][j] = valid[j][i] = inroad[i][j] = inroad[j][i]= 0;
+						prev[j] = i;
 					}else{
-						(*prev)[j] = hold;
+						prev[j] = hold;
 					}
 				}
 
-			 } 
+			}
 		}
+		/*for(int i=1; i<from;i++){
+			for (int j = 1; j <=nodes; j++)
+			{	
+			 	if((*graph)[i][j].cost!=-1 && valid[i][j]!=0 &&
+			 		distances[j] < distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost){	
+					hold = prev[j];
+					prev[j] = i;
+					if(!infinite(&prev,i)){
+						distances[j] = distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost;
+						//cout<<"i "<<i<<' '<<distances[i]<<endl;
+						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						valid[i][j] = valid[j][i] = inroad[i][j] = inroad[j][i]= 0;
+						prev[j] = i;
+					}else{
+						prev[j] = hold;
+					}
+				}
+
+			}
+		}*/
 	}
+	for(int i=1;i<=nodes;i++)cout<<distances[i]<<' ';
+		cout<<endl;
+	return prev;
 }
 void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)[110][110], Graph *g){
 	cout<<"Empezando"<<endl;
@@ -211,7 +244,7 @@ int main(){
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
 	int costResult[110][110],beneResult[110][110],benePaths[110][110];
 	vector<vector<int> > CkR;
-	vector<int> BCk,prevs(110,-1),bellResult;
+	vector<int> BCk,prevs(110,-1),bellResult,back;
 	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
 	int bestCompDijk,bestCompB,max;
 	for(int i=0;i<110;i++){
@@ -232,7 +265,7 @@ int main(){
 		Gr[v2][v1] = mp(cost,value);
 		graphFloyd[v1][v2]COST = cost; graphFloyd[v1][v2]VALUE = value;
 		graphFloyd[v2][v1]COST = cost; graphFloyd[v2][v1]VALUE = value;
-		bene4Floyd[v1][v2] = bene4Floyd[v2][v1] = cost - value;
+		bene4Floyd[v1][v2] = bene4Floyd[v2][v1] = value - cost;
 	}
 	scanf("number of non required edges  %d \n",&nedgesR);
 	for(int i=0; i<nedgesR; i++){
@@ -242,7 +275,7 @@ int main(){
 		graph[v2][v1] = mp(cost,value);
 		graphFloyd[v1][v2]COST = cost; graphFloyd[v1][v2]VALUE = value;
 		graphFloyd[v2][v1]COST = cost; graphFloyd[v2][v1]VALUE = value;
-		bene4Floyd[v1][v2] = bene4Floyd[v2][v1] = cost - value;
+		bene4Floyd[v1][v2] = bene4Floyd[v2][v1] = value - cost;
 	}
 	cout<<"Leido"<<endl;
 	fldWrshllC(nodes,&graphFloyd,&costResult,&costPaths,&graph);
@@ -254,10 +287,12 @@ int main(){
 		cout<<endl;
 	max = findmax(bellResult);
 	printpath(prevs,max);
+	back = regreso(nodes,max,&graph,&prevs);
+	printpath(back,1);
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
 	else{
-		bestCompCost(depo, &graph, &CkR, &prevs);
+		//bestCompCost(depo, &graph, &CkR, &prevs);
 	}
 	BCk.resize(CkR.size(),0);
 	cout<<"Recorrido"<<endl;
