@@ -288,9 +288,9 @@ int main(){
 		cout<<endl;
 	//max = findmax(bellResult);
 	//printpath(prevs,max);
-	backResult = regreso(nodes,2,&graph,&prevs,&backprevs);
-	max = bellResult[2] + backResult[1];
-	best = 2;
+	backResult = regreso(nodes,1,&graph,&prevs,&backprevs);
+	max = bellResult[1] + backResult[1];
+	best = 1;
 	bestbackpath = backprevs;
 	for (int i = 3; i <= nodes; ++i)
 	{	
