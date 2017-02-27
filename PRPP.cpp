@@ -335,8 +335,22 @@ void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)
 		}
 	}
 }
-vector<int> mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int> *venida,int bst){	
-	int inpaths[110][110], improved[110],node, best;
+vector<int> constructPath(vector<int>venida,vector<int>ida,int node){
+	vector<int> path;
+	int i = node;
+	while(venida[i]!=-1){
+		path.pb(i);
+		i = venida[i];
+	}
+	path.pb(i);
+	while(ida[i]!=-1){
+		path.pb(i);
+		i = ida[i];
+	}
+	path.pb(i);
+}
+vector<vector<int> > mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int> *venida,int bst){	
+	int inpaths[110][110], improved[110],node, best,max;
 	vector<vector<int> > additions(110);
 	vector<int> prevs(110,-1),backprevs(110,-1),bellResult,backResult;
 	vector<int> bestbackpath;
@@ -349,6 +363,8 @@ vector<int> mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int> *venida
 		if(!improved[node])
 			fill(backprevs.begin(),backprevs.end(),-1);
 			fill(prevs.begin(),prevs.end(),-1);
+			bellResult = vector<int> (); 
+			backResult = vector<int> ();
 			bellResult = bellman(nodes,node,graph, &prevs,&inpaths);
 			backResult = regreso(nodes,node,graph,&prevs,&backprevs,&inpaths);
 			max = bellResult[node] + backResult[node];
@@ -368,8 +384,8 @@ vector<int> mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int> *venida
 			if(max>0){
 				additions[node] = constructPath(bestbackpath,prevs,node);
 				improved[node] = 1;
-				mark(best,prevs,&inpaths);
-				mark(node,backprevs,&inpaths);
+				mark(best,&prevs,&inpaths);
+				mark(node,&backprevs,&inpaths);
 			}
 		node = (*ida)[node];
 	}
@@ -397,8 +413,8 @@ vector<int> mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int> *venida
 			if(max>0){
 				additions[node] = constructPath(bestbackpath,prevs,node);
 				improved[node] = 1;
-				mark(best,prevs,&inpaths);
-				mark(node,backprevs,&inpaths);
+				mark(best,&prevs,&inpaths);
+				mark(node,&backprevs,&inpaths);
 			}
 		node = (*venida)[node];
 	}
@@ -430,7 +446,7 @@ void printpath(vector<int> prv, int max){
 	}
 	cout<<i<<endl;
 }
-vector<int> add(vector<int> *path,vector<int> *mejoras){
+vector<int> add(vector<int> *path,vector<vector<int> > *mejoras){
 	vector<int> final;
 	for(int i=0;i<(*path).size();i++){
 		final.pb((*path)[i]);
@@ -441,28 +457,15 @@ vector<int> add(vector<int> *path,vector<int> *mejoras){
 	}
 	return final;
 }
-vector<int> constructPath(vector<int>venida,vector<int>ida,int node){
-	vector<int> path;
-	int i = node;
-	while(venida[i]!=-1){
-		path.pb(i);
-		i = venida[i];
-	}
-	path.pb(i);
-	while(ida[i]!=-1){
-		path.pb(i);
-		i = ida[i];
-	}
-	path.pb(i);
-}
+
 int main(){
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
 	int costResult[110][110],beneResult[110][110],benePaths[110][110];
 	Graph graph(110,connections(110,mp(-1,-1)));
 	Graph Gr(110,connections(110,mp(-1,-1)));
-	vector<vector<int> > CkR;
+	vector<vector<int> > CkR,improvements;
 	vector<int> BCk,prevs(110,-1),bellResult,backResult,backprevs(110,-1);
-	vector<int> bestbackpath,path;
+	vector<int> bestbackpath,path,final;
 	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
 	int bestCompDijk,bestCompB,max,best;
 	for(int i=0;i<110;i++){
@@ -523,7 +526,10 @@ int main(){
 	cout<<max<<endl;
 	path = constructPath(bestbackpath,prevs,depo);
 	improvements = mejorar(nodes,&graph,&prevs,&backprevs,best);
-	add(&path,&improvements);
+	final = add(&path,&improvements);
+	cout<<"####"<<endl;
+	for(int i=0;i<=final.size();i++)cout<<final[i]<<' ';
+		cout<<endl;
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
 	else{
