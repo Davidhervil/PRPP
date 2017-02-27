@@ -518,9 +518,9 @@ int main(){
 	//leprint(nodes,&costResult);
 	cout<<"Vamos con Bell"<<endl;
 	bellResult=bellman(nodes,depo,&graph, &prevs);
+
 	for(int i=1;i<=nodes;i++)cout<<bellResult[i]<<' ';
 		cout<<endl;
-	
 	backResult = regreso(nodes,depo,&graph,&prevs,&backprevs);
 	max = bellResult[depo] + backResult[depo];
 	best = depo;
@@ -572,5 +572,5 @@ int main(){
 		}
 		cout<<"Beneficio: "<<BCk[c]<<endl;
 	}
-*/
+	*/
 }
