@@ -87,7 +87,7 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
 	int valid[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[s] = 0;
-	cout<<"Empezando Bell"<<endl;
+	//cout<<"Empezando Bell"<<endl;
 	memset(valid,-1,sizeof(valid));
 	for (int node = 1; node <= nodes-1; node++)
 	{
@@ -137,7 +137,7 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev, int (*inpa
 	int valid[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[s] = 0;
-	cout<<"Empezando Bell"<<endl;
+	//cout<<"Empezando Bell"<<endl;
 	memset(valid,-1,sizeof(valid));
 	for (int node = 1; node <= nodes-1; node++)
 	{
@@ -196,7 +196,7 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 	int valid[110][110],inroad[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[from] = 0;
-	cout<<"Empezando Regreso"<<endl;
+	//cout<<"Empezando Regreso"<<endl;
 	memset(inroad,-1,sizeof(inroad));
 	mark(from,ida,&inroad);
 	memset(valid,-1,sizeof(valid));
@@ -251,7 +251,7 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 	int valid[110][110],inroad[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[from] = 0;
-	cout<<"Empezando Regreso"<<endl;
+	//cout<<"Empezando Regreso"<<endl;
 	memset(inroad,-1,sizeof(inroad));
 	mark(from,ida,&inroad);
 	memset(valid,-1,sizeof(valid));
@@ -454,12 +454,21 @@ vector<int> add(vector<int> *path,vector<vector<int> > *mejoras){
 		final.pb((*path)[i]);
 		if((*mejoras)[(*path)[i]].size()!=0){
 			for(int j = 1; j<(*mejoras)[(*path)[i]].size();j++)
+				if(final.back()!=(*mejoras)[(*path)[i]][j])		
 				final.pb((*mejoras)[(*path)[i]][j]);
 		}
 	}
 	return final;
 }
-
+int profit(vector<int> p,Graph *G){
+	int marked[110][110],total=0,last=p[0];
+	memset(marked,-1,sizeof(marked));
+	for(int i=1;i<p.size();i++){
+		total += (-marked[last][p[i]])*(*G)[last][p[i]].value - (*G)[last][p[i]].cost;
+		marked[last][p[i]] = marked[p[i]][last] = 0;
+	}
+	return total;
+}
 int main(){
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
 	int costResult[110][110],beneResult[110][110],benePaths[110][110];
@@ -531,8 +540,10 @@ int main(){
 	improvements = mejorar(nodes,&graph,&prevs,&backprevs,best);
 	final = add(&path,&improvements);
 	cout<<"####"<<endl;
-	for(int i=0;i<=final.size();i++)cout<<final[i]<<' ';
+	for(int i=0;i<final.size();i++)cout<<final[i]<<' ';
 		cout<<endl;
+	cout<<"Ganancia "<<profit(final,&graph);
+
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
 	else{
