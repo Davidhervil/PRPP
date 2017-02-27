@@ -339,15 +339,18 @@ vector<int> constructPath(vector<int> venida,vector<int> ida,int node){
 	vector<int> path;
 	int i = node;
 	cout<<"Armando ciclo"<<endl;
-	while(venida[i]!=-1){
+	path.pb(i);
+	i=venida[i];
+	while(i!=-1){
 		path.pb(i);
 		i = venida[i];
 	}
-	while(ida[i]!=-1){
+	i=path.back();
+	i=ida[i];
+	while(i!=-1){
 		path.pb(i);
 		i = ida[i];
 	}
-	path.pb(i);
 	return path;
 }
 vector<vector<int> > mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int> *venida,int bst){	
@@ -465,6 +468,7 @@ int profit(vector<int> p,Graph *G){
 	for(int i=1;i<p.size();i++){
 		total += (-marked[last][p[i]])*(*G)[last][p[i]].value - (*G)[last][p[i]].cost;
 		marked[last][p[i]] = marked[p[i]][last] = 0;
+		last = p[i];
 	}
 	return total;
 }
@@ -541,7 +545,7 @@ int main(){
 	cout<<"####"<<endl;
 	for(int i=0;i<final.size();i++)cout<<final[i]<<' ';
 		cout<<endl;
-	cout<<"Ganancia "<<profit(final,&graph);
+	cout<<"Ganancia "<<profit(final,&graph)<<endl;
 
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
