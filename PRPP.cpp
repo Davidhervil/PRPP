@@ -335,9 +335,10 @@ void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)
 		}
 	}
 }
-vector<int> constructPath(vector<int>venida,vector<int>ida,int node){
+vector<int> constructPath(vector<int> venida,vector<int> ida,int node){
 	vector<int> path;
 	int i = node;
+	cout<<"Armando ciclo"<<endl;
 	while(venida[i]!=-1){
 		path.pb(i);
 		i = venida[i];
@@ -348,6 +349,7 @@ vector<int> constructPath(vector<int>venida,vector<int>ida,int node){
 		i = ida[i];
 	}
 	path.pb(i);
+	return path;
 }
 vector<vector<int> > mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int> *venida,int bst){	
 	int inpaths[110][110], improved[110],node, best,max;
@@ -525,6 +527,7 @@ int main(){
 	printpath(bestbackpath,depo);
 	cout<<max<<endl;
 	path = constructPath(bestbackpath,prevs,depo);
+	cout<<"Haciendo mejoras"<<endl;
 	improvements = mejorar(nodes,&graph,&prevs,&backprevs,best);
 	final = add(&path,&improvements);
 	cout<<"####"<<endl;
