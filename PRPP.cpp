@@ -556,6 +556,7 @@ int main(){
 	cout<<"Recorrido"<<endl;
 	vector<int> printed(110,0);
 	int c = 0;
+	/*
 	for(vector<vector<int> >::iterator comp = CkR.begin();
 		comp!=CkR.end(); ++comp,c++)
 	{	
@@ -571,5 +572,5 @@ int main(){
 		}
 		cout<<"Beneficio: "<<BCk[c]<<endl;
 	}
-
+*/
 }
