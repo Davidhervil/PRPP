@@ -343,7 +343,6 @@ vector<int> constructPath(vector<int> venida,vector<int> ida,int node){
 		path.pb(i);
 		i = venida[i];
 	}
-	path.pb(i);
 	while(ida[i]!=-1){
 		path.pb(i);
 		i = ida[i];
