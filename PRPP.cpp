@@ -1,4 +1,8 @@
-#include <bits/stdc++.h> //Esto incluye TODO ,despues hay que sacar todos los includes  que usemos
+#include <iostream>
+#include <stdio.h>
+#include <stack>
+#include <vector>
+#include <string.h>
 
 #define cost first
 #define value second
@@ -11,24 +15,10 @@
 using namespace std;
 typedef vector<pair<int,int> > connections;
 typedef vector<vector<pair <int,int> > > Graph;
-typedef struct edgy
-{
-	int v1,v2,cost,value;
-}Edge;
-
-class mycomparison
-{  Graph *G;
-public:
-  mycomparison(Graph *g)
-    {G = g; }
-  bool operator() (const pair<int,int>&v1, pair<int,int>&v2) const
-  { //par(vertice,distancia)
-    return (v1.second < v2.second);
-  }
-};
 
 /* 	Este dfs modifica conexComp quedando con las listas de los nodos que componen
-	cada componente conexa del grafo graph.
+	cada componente conexa del grafo graph. Inicialmente era considerada 
+	para formar parte de la heuristica
 */
 void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 	int visited[nodes+1],done[nodes+1];
@@ -68,8 +58,10 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 			comp++;
 		}
 	}
-	cout<<"Rolled"<<endl;
+	//cout<<"Rolled"<<endl;
 }
+/* Esta funcion retorna 1 si el camino *prev es un ciclo
+*/
 int infinite( vector<int> *prev,int from){
 	int i = from,cycle=0;
 	while((*prev)[i]!=-1){
@@ -83,6 +75,11 @@ int infinite( vector<int> *prev,int from){
 	return cycle;
 	//cout<<i<<endl;
 }
+
+/* 	Procedimiento inspirado en el algoritmo de Bellman-Ford, que retorna
+	una lista con los beneficios hacia todos los nodos desde el deposito.
+	en prev, se guarda indirectamente los caminos hacia estos nodos
+*/
 vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
 	int valid[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
@@ -133,6 +130,12 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
 	}
 	return distances;
 }
+/* 	Procedimiento inspirado en el algoritmo de Bellman-Ford, que retorna
+	una lista con los beneficios hacia todos los nodos desde el deposito.
+	en prev, se guarda indirectamente los caminos hacia estos nodos.
+	Esta es una sobrecarga del procedimeinto anterior. Se utiliza en el algoritmos
+	que intenta mejorar la solucion
+*/
 vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev, int (*inpaths)[110][110]){
 	int valid[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
@@ -183,6 +186,9 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev, int (*inpa
 	}
 	return distances;
 }
+/* 	Dado un camino parcial indirecto guardado en *p, marca las aristas en la 
+	tabla *inroad que se encuentren en este.
+*/
 void mark(int from, vector<int> *p,int (*inroad)[110][110] ){
 	int i = from,cycle=0;
 	while((*p)[i]!=-1){
@@ -192,6 +198,10 @@ void mark(int from, vector<int> *p,int (*inroad)[110][110] ){
 		i = (*p)[i];
 	}
 }
+/* 	Modificacion del procedimiento 'bellman' antes mencionado. Dado un camino parcial de ida
+	retorna una lista con los beneficios resultantes de regresar al deposito para cada nodo.
+	En *prev se guarda indirectamente ese camino de regreso.
+*/
 vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<int> *prev){
 	int valid[110][110],inroad[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
@@ -247,6 +257,11 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 	//	cout<<endl;
 	return distances;
 }
+/* 	Modificacion del procedimiento 'bellman' antes mencionado. Dado un camino parcial de ida
+	retorna una lista con los beneficios resultantes de regresar al deposito para cada nodo.
+	En *prev se guarda indirectamente ese camino de regreso.
+	Esta es una sobre carga del procedimiento anterior que se usa en la mejora de soluciones.
+*/
 vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<int> *prev, int (*inpaths)[110][110]){
 	int valid[110][110],inroad[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
@@ -302,8 +317,11 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 	//	cout<<endl;
 	return distances;
 }
+/*	Algoritmo de Floyd-Warshall para costo minimo entre todos los nodos.
+	Fue pensado util durante el inicio del proyecto.
+*/
 void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)[110][110], Graph *g){
-	cout<<"Empezando"<<endl;
+	//cout<<"Empezando"<<endl;
 	for(int i = 1;i<=nodes;i++){
 		for(int j= 1; j<=nodes;j++){
 			(*cP)[i][j] = -1;
@@ -320,7 +338,7 @@ void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)
 			}
 		}
 	}
-	cout<<"Floydeando"<<endl;
+	//cout<<"Floydeando"<<endl;
 	for (int k = 1; k <= nodes; k++)
 	{	
 		for (int i = 1; i <= nodes; i++)
@@ -335,10 +353,13 @@ void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)
 		}
 	}
 }
+/* 	Este procedimiento reconstruye en una lista de nodos 
+	el ciclo resultante de los dos caminos parciales de ida y vuelta desde node
+*/
 vector<int> constructPath(vector<int> venida,vector<int> ida,int node){
 	vector<int> path;
 	int i = node;
-	cout<<"Armando ciclo"<<endl;
+	//cout<<"Armando ciclo"<<endl;
 	path.pb(i);
 	i=venida[i];
 	while(i!=-1){
@@ -353,6 +374,11 @@ vector<int> constructPath(vector<int> venida,vector<int> ida,int node){
 	}
 	return path;
 }
+/* 	Procedimiento de mejora de soluciones. El objetivo es usar cada nodo de la
+	solucion propuesta como un deposito virtual y reaplicar el algoritmo general 
+	de busqueda de solucion a manera de	buscar posibles caminos obviados en la
+	primera corrida.
+*/
 vector<vector<int> > mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int> *venida,int bst){	
 	int inpaths[110][110], improved[110],node, best,max;
 	vector<vector<int> > additions(110);
@@ -424,6 +450,8 @@ vector<vector<int> > mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int
 	}
 	return additions;
 }
+/* Procedimiento auxiliar para debugging
+*/
 void leprint (int nodes,int (*cR)[110][110]){
 	for(int i = 1;i<=nodes;i++){
 		for(int j=1; j<=nodes;j++){
@@ -432,16 +460,8 @@ void leprint (int nodes,int (*cR)[110][110]){
 		cout<<endl;
 	}
 }
-int findmax(vector<int> v){
-	int max=v[0],holis;
-	for(int i=0;i<v.size();i++){
-		if(v[i]>=max){
-			max=v[i];
-			holis=i;
-			}
-	}
-	return holis;
-}
+/* Procedimiento que imprime en pantalla un camino parcial.
+*/
 void printpath(vector<int> prv, int max){
 	int i = max;
 	while(prv[i]!=-1){
@@ -450,6 +470,9 @@ void printpath(vector<int> prv, int max){
 	}
 	cout<<i<<endl;
 }
+/* 	Procedimiento que anhade las posibles mejoras  encontradas
+	a la solucion proveida
+*/
 vector<int> add(vector<int> *path,vector<vector<int> > *mejoras){
 	vector<int> final;
 	for(int i=0;i<(*path).size();i++){
@@ -462,6 +485,8 @@ vector<int> add(vector<int> *path,vector<vector<int> > *mejoras){
 	}
 	return final;
 }
+/* Funcion que obtiene el beneficio total de una solucion p. 
+*/
 int profit(vector<int> p,Graph *G){
 	int marked[110][110],total=0,last=p[0];
 	memset(marked,-1,sizeof(marked));
@@ -472,7 +497,11 @@ int profit(vector<int> p,Graph *G){
 	}
 	return total;
 }
+
+/* Procedimiento principal
+*/
 int main(){
+
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
 	int costResult[110][110],beneResult[110][110],benePaths[110][110];
 	Graph graph(110,connections(110,mp(-1,-1)));
@@ -481,7 +510,7 @@ int main(){
 	vector<int> BCk,prevs(110,-1),bellResult,backResult,backprevs(110,-1);
 	vector<int> bestbackpath,path,final;
 	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
-	int bestCompDijk,bestCompB,max,best;
+	int bestCompDijk,bestCompB,max,best,ganancia;
 	for(int i=0;i<110;i++){
 
 		memset(graphFloyd[i],0,sizeof(graphFloyd[i]));
@@ -492,7 +521,7 @@ int main(){
 	scanf("number of required edges  %d \n",&edgesR);
 	for(int i=0; i<edgesR; i++){
 		scanf("%d %d %d %d \n",&v1,&v2,&cost,&value);
-		cout<<v1<<' '<<v2<<' '<<cost<<' '<<value<<endl;
+		//cout<<v1<<' '<<v2<<' '<<cost<<' '<<value<<endl;
 		if(v1 == 1 || v2== 1)dinR=1;
 		graph[v1][v2] = mp(cost,value);
 		graph[v2][v1] = mp(cost,value);
@@ -505,22 +534,22 @@ int main(){
 	scanf("number of non required edges  %d \n",&nedgesR);
 	for(int i=0; i<nedgesR; i++){
 		scanf("%d %d %d %d \n",&v1,&v2,&cost,&value);
-		cout<<v1<<' '<<v2<<' '<<cost<<' '<<value<<endl;
+		//cout<<v1<<' '<<v2<<' '<<cost<<' '<<value<<endl;
 		graph[v1][v2] = mp(cost,value);
 		graph[v2][v1] = mp(cost,value);
 		graphFloyd[v1][v2]COST = cost; graphFloyd[v1][v2]VALUE = value;
 		graphFloyd[v2][v1]COST = cost; graphFloyd[v2][v1]VALUE = value;
 		bene4Floyd[v1][v2] = bene4Floyd[v2][v1] = value - cost;
 	}
-	cout<<"Leido"<<endl;
+	//cout<<"Leido"<<endl;
 	fldWrshllC(nodes,&graphFloyd,&costResult,&costPaths,&graph);
-	cout<<"fldWrshllC Listo"<<endl;
+	//cout<<"fldWrshllC Listo"<<endl;
 	//leprint(nodes,&costResult);
-	cout<<"Vamos con Bell"<<endl;
+	//cout<<"Vamos con Bell"<<endl;
 	bellResult=bellman(nodes,depo,&graph, &prevs);
 
-	for(int i=1;i<=nodes;i++)cout<<bellResult[i]<<' ';
-		cout<<endl;
+	//for(int i=1;i<=nodes;i++)cout<<bellResult[i]<<' ';
+	//	cout<<endl;
 	backResult = regreso(nodes,depo,&graph,&prevs,&backprevs);
 	max = bellResult[depo] + backResult[depo];
 	best = depo;
@@ -535,18 +564,25 @@ int main(){
 			bestbackpath = backprevs;
 		}
 	}
-	printpath(prevs,best);
-	printpath(bestbackpath,depo);
-	cout<<max<<endl;
+	//printpath(prevs,best);
+	//printpath(bestbackpath,depo);
+	//cout<<max<<endl;
 	path = constructPath(bestbackpath,prevs,depo);
-	cout<<"Haciendo mejoras"<<endl;
+	//cout<<"Haciendo mejoras"<<endl;
 	improvements = mejorar(nodes,&graph,&prevs,&backprevs,best);
 	final = add(&path,&improvements);
-	cout<<"####"<<endl;
-	for(int i=0;i<final.size();i++)cout<<final[i]<<' ';
+	//cout<<"####"<<endl;
+	ganancia = profit(final,&graph);
+	if(ganancia>max){
+		cout<<ganancia<<endl;
+		for(int i=0;i<final.size();i++)cout<<final[i]<<' ';
+			cout<<endl;
+	}else{
+		cout<<max<<endl;
+		for(int i=0;i<path.size();i++)cout<<path[i]<<' ';
 		cout<<endl;
-	cout<<"Ganancia "<<profit(final,&graph)<<endl;
-
+	}
+	/*
 	if(dinR)//CkR[0] esta en solucion
 	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
 	else{
@@ -556,7 +592,7 @@ int main(){
 	cout<<"Recorrido"<<endl;
 	vector<int> printed(110,0);
 	int c = 0;
-	/*
+	
 	for(vector<vector<int> >::iterator comp = CkR.begin();
 		comp!=CkR.end(); ++comp,c++)
 	{	
