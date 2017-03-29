@@ -76,7 +76,7 @@ int busqueda(Graph *graph){
 		be = sucessores[i].second();
 		ce = (*graph)[v][e].cost;
 		if(!cumple_acota(graph,v,e,be,ce,benef) &&
-			!esta_lado_en_sol_parcial(make_pair(v,e)),be) {		 
+			!esta_lado_en_sol_parcial(make_pair(v,e),be)) {		 
 			solParcial.pb(e);	 							// Agregar a la solucion parcial.
 			beneficioDisponible -= max(0,be-ce);
 			busqueda(G);									// ?????????????????
