@@ -10,19 +10,8 @@ typedef vector<vector<pair <int,int> > > Graph;
 /* Funcion que obtiene el beneficio total de una solucion p. 
 */
 
-int visitados(vector<int> p, int (*marked)[110][110],Graph *G){
-	int total=0,last=p[0];
-	for(int i=1;i<p.size();i++){
-		total += (-marked[last][p[i]])*(*G)[last][p[i]].value - (*G)[last][p[i]].cost;
-		marked[last][p[i]] = marked[p[i]][last] = 0;
-		last = p[i];
-	}
-	return total;
-}
-
 /* Recibe par(nodo,beneficio) y lo ordena de mayor a menor*/
 bool comparador (pair <int,int> i,pair <int,int> j) {return (i.second>j.second); }
-
 
 int busqueda(Graph *graph){
 	// VARIABLES
@@ -34,26 +23,28 @@ int busqueda(Graph *graph){
 	*/
 	// Locales:
 	vector<pair <int,int>> sucesores;						// Vector de sucesores con sus beneficios.
-	int marcados[110][110];									// Aristas que ya fueron visitadas.
-	int s,benefN,benef,v;											
+	int s,b1,b2,benef,v;											
 	memset(marked,-1,sizeof(marked));						// Inicializar marcados
 
 	// ALGORITMO
 	v = solParcial.back();									// El vertice mas externo de la solucion parcial
-	benef = visitados(solParcial,&marcados,&graph)			// Hallar aristas visitadas o recorridas (MEJORABLE)
+	benef = profit(solParcial,&graph)						// Hallar beneficio actual (MEJORABLE)
 	if(v == 1 && benef > mayorBen){							// Reasignar mejor solucion
 		mejorSol = solParcial;
-		mayorBen = benef;
+		mayorBen = benef;									
 	}
 
-	for(int i=1;i<graph[v].size();i++){						// Revisar los sucesores
+	for(int i=1;i<graph[v].size();i++){						// Crear lista de sucesores
 		s = graph[v][i];
 		if ( s != -1){
-			benefN = benef + marcados[s][i]*graph[s][i].value - graph[s][i].cost
-			sucesores.pb(make_pair(i,benefN));
+			b1 = benef + graph[s][i].value - graph[s][i].cost;	// calcular beneficio nuevo
+			b2 = benef - graph[s][i].cost						// Calcular beneficio nuevo
+			sucesores.pb(make_pair(i,b1));						// Agregar vecinos.
+			sucesores.pb(make_pair(i,b2));
 		}
 	}
-	sort(sucesores.begin(), sucesores.end(), comparador);	// Ordenar sucesores de mayor a menor.
+	sort(sucesores.begin(), sucesores.end(), comparador);		// Ordenar sucesores de mayor a menor.
+
 	for(int i=1; i<sucesores.size(); i++){					// Recorrer desde el ultimo.
 		e = sucesores[i].first(); 							// Aqui esta el nodo a verificar (Bueno, la arista)
 		be = graph[v][e].value;
@@ -61,7 +52,7 @@ int busqueda(Graph *graph){
 		if(verificaciones){		 
 			solParcial.pb(e);	 							// Agregar a la solucion parcial.
 			beneficioDisponible -= max(0,be-ce);
-			busqueda();
+			busqueda(G);									// ?????????????????
 		}
 	}
 	beneficioDisponible += max(0,be-ce);
