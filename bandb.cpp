@@ -7,6 +7,30 @@
 using namespace std;
 typedef vector<vector<pair <int,int> > > Graph;
 
+bool esta_lado_en_sol_parcial(vector<int> sparcial, pair<int,int> e, int be){
+	int marked[110][110];
+	int ant;
+	ant = sparcial[0];
+	memset(marked,-1,sizeof(marked));
+
+	for(int i=1;i<sparcial.size();i++){
+		marked[ant][sparcial[i]] += 1;
+		marked[sparcial[i]][ant] += 1;
+		ant=sparcial[i];
+	}
+	if(marked[e.first][e.second]==-1){
+		return false
+	}
+	else if(marked[e.first][e.second]==0){
+		if(be == 0){
+			return false;
+		}else{
+			return true;
+		}
+	}
+	return true;
+
+}
 
 /* Recibe par(nodo,beneficio) y lo ordena de mayor a menor*/
 bool comparador (pair <int,int> i,pair <int,int> j) {return (i.value>j.value); }
