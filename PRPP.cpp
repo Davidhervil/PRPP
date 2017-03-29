@@ -3,6 +3,7 @@
 #include <stack>
 #include <vector>
 #include <string.h>
+#include <algorithm>
 
 #define cost first
 #define value second
@@ -15,6 +16,9 @@
 using namespace std;
 typedef vector<pair<int,int> > connections;
 typedef vector<vector<pair <int,int> > > Graph;
+int beneficioDisponible, mayorBen;
+vector<int> solParcial (1,1);
+vector<int> mejorSol;
 
 /* 	Este dfs modifica conexComp quedando con las listas de los nodos que componen
 	cada componente conexa del grafo graph. Inicialmente era considerada 
@@ -153,8 +157,6 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev, int (*inpa
 					(*prev)[j] = i;
 					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (-(*inpaths)[i][j])*(*graph)[i][j].value-(*graph)[i][j].cost;
-						//cout<<"i "<<i<<' '<<distances[i]<<endl;
-						//cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = 0;
 						(*prev)[j] = i;
 					}else{
@@ -500,6 +502,109 @@ int profit(vector<int> p,Graph *G){
 
 /* Procedimiento principal
 */
+
+
+bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
+	int marked[110][110];
+	int ant;
+	ant = solParcial[0];
+	memset(marked,-1,sizeof(marked));
+	for(int i=1;i<solParcial.size();i++){
+		marked[ant][solParcial[i]] += 1;
+		marked[solParcial[i]][ant] += 1;
+		ant=solParcial[i];
+	}
+	if(marked[e.first][e.second]==-1){
+		return false;
+	}
+	else if(marked[e.first][e.second]==0){
+		if(be == 0){
+			return false;
+		}else{
+			return true;
+		}
+	}
+	return true;
+}
+
+bool cumple_acota(Graph *graph, int v, int e,int be, int ce, int benef){
+	int beneficioE, beneficioSolP, beneficioMax;
+	beneficioE    = be-ce;
+	beneficioSolP = benef + beneficioE;
+	beneficioMax  = beneficioDisponible - max(0,be-ce) + beneficioSolP;
+	return beneficioMax > mayorBen;
+}
+
+/* Recibe par(nodo,beneficio) y lo ordena de mayor a menor*/
+bool comparador (pair <int,int> i,pair <int,int> j) {return (i.value>j.value); }
+
+int busqueda(Graph *graph){
+	// VARIABLES
+	/* Globales:
+	 	beneficioDisponible
+		solParcial
+		mejorSol
+		mayorBen
+	*/
+	// Locales:
+	vector<pair <int,int> > sucesores;						// Vector de sucesores con sus beneficios.
+	int s,b1,b2,be,ce,benef,v,e;											
+
+	// ALGORITMO
+	v = solParcial.back();									// El vertice mas externo de la solucion parcial
+	benef = profit(solParcial,graph);						// Hallar beneficio actual (MEJORABLE)
+	if(v == 1 && benef > mayorBen){							// Reasignar mejor solucion
+		mejorSol = solParcial;
+		mayorBen = benef;									
+	}
+
+	for(int i=1;i<(*graph)[v].size();i++){						// Crear lista de sucesores
+		s = (*graph)[v][i].value;
+		if ( s != -1){
+			b1 = benef + (*graph)[v][i].value - (*graph)[v][i].cost;	// calcular beneficio nuevo
+			b2 = benef - (*graph)[v][i].cost;						// Calcular beneficio nuevo
+			sucesores.pb(make_pair(i,b1));						// Agregar vecinos.
+			sucesores.pb(make_pair(i,b2));
+		}
+	}
+	sort(sucesores.begin(), sucesores.end(), comparador);		// Ordenar sucesores de mayor a menor.
+
+	for(int i=0; i<sucesores.size(); i++){					// Recorrer desde el ultimo.
+		e  = sucesores[i].first; 							// Aqui esta el nodo a verificar (Bueno, la arista)
+		be = sucesores[i].second;
+		ce = (*graph)[v][e].cost;
+		if(!cumple_acota(graph,v,e,be,ce,benef) &&
+			!esta_lado_en_sol_parcial(make_pair(v,e),be)) {		 
+			solParcial.pb(e);	 							// Agregar a la solucion parcial.
+			beneficioDisponible -= max(0,be-ce);
+			busqueda(graph);									// ?????????????????
+		}
+	}
+	beneficioDisponible += max(0,be-ce);
+	sucesores.pop_back();
+
+}
+
+int mayor_ben_grafo(Graph *graph){
+	int r=0;
+	for(int i=0;i<(*graph)[0].size();i++){
+		for(int j=0;j<(*graph)[0].size();j++){
+			r += ((*graph)[i][j].value)/2;
+		}
+	}
+	return r;
+}
+int bandb(Graph *G, vector<int> *solInicial, int benInicial){
+	mejorSol = (*solInicial);
+	mayorBen = benInicial;
+	beneficioDisponible = mayor_ben_grafo(G);		///// ??????
+	busqueda(G);										///// ??????
+	cout<<mayorBen<<endl;
+	for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
+		cout<<endl;
+}
+
+
 int main(){
 
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
@@ -512,8 +617,6 @@ int main(){
 	int nodes,edgesR,nedgesR,cost,value,v1,v2,dinR=0;
 	int bestCompDijk,bestCompB,max,best,ganancia;
 	for(int i=0;i<110;i++){
-
-		memset(graphFloyd[i],0,sizeof(graphFloyd[i]));
 		memset(costPaths[i],-1,sizeof(costPaths[i]));
 		memset(benePaths[i],-1,sizeof(benePaths[i]));
 	}
@@ -521,39 +624,26 @@ int main(){
 	scanf("number of required edges  %d \n",&edgesR);
 	for(int i=0; i<edgesR; i++){
 		scanf("%d %d %d %d \n",&v1,&v2,&cost,&value);
-		//cout<<v1<<' '<<v2<<' '<<cost<<' '<<value<<endl;
 		if(v1 == 1 || v2== 1)dinR=1;
 		graph[v1][v2] = mp(cost,value);
 		graph[v2][v1] = mp(cost,value);
 		Gr[v1][v2] = mp(cost,value);
 		Gr[v2][v1] = mp(cost,value);
-		graphFloyd[v1][v2]COST = cost; graphFloyd[v1][v2]VALUE = value;
-		graphFloyd[v2][v1]COST = cost; graphFloyd[v2][v1]VALUE = value;
-		bene4Floyd[v1][v2] = bene4Floyd[v2][v1] = value - cost;
 	}
+
 	scanf("number of non required edges  %d \n",&nedgesR);
 	for(int i=0; i<nedgesR; i++){
 		scanf("%d %d %d %d \n",&v1,&v2,&cost,&value);
-		//cout<<v1<<' '<<v2<<' '<<cost<<' '<<value<<endl;
 		graph[v1][v2] = mp(cost,value);
 		graph[v2][v1] = mp(cost,value);
-		graphFloyd[v1][v2]COST = cost; graphFloyd[v1][v2]VALUE = value;
-		graphFloyd[v2][v1]COST = cost; graphFloyd[v2][v1]VALUE = value;
-		bene4Floyd[v1][v2] = bene4Floyd[v2][v1] = value - cost;
 	}
-	//cout<<"Leido"<<endl;
-	fldWrshllC(nodes,&graphFloyd,&costResult,&costPaths,&graph);
-	//cout<<"fldWrshllC Listo"<<endl;
-	//leprint(nodes,&costResult);
-	//cout<<"Vamos con Bell"<<endl;
-	bellResult=bellman(nodes,depo,&graph, &prevs);
-
-	//for(int i=1;i<=nodes;i++)cout<<bellResult[i]<<' ';
-	//	cout<<endl;
-	backResult = regreso(nodes,depo,&graph,&prevs,&backprevs);
-	max = bellResult[depo] + backResult[depo];
-	best = depo;
+	//for(int i=0;i<graph[0].size();i++)cout<<graph[0][i].second<<' ';         ////////////////////////////////
+	bellResult 	 = bellman(nodes,depo,&graph, &prevs);
+	backResult 	 = regreso(nodes,depo,&graph,&prevs,&backprevs);
 	bestbackpath = backprevs;
+	max  = bellResult[depo] + backResult[depo];
+	best = depo;
+
 	for (int i = 2; i <= nodes; i++)
 	{	
 		fill(backprevs.begin(),backprevs.end(),-1);
@@ -568,45 +658,21 @@ int main(){
 	//printpath(bestbackpath,depo);
 	//cout<<max<<endl;
 	path = constructPath(bestbackpath,prevs,depo);
-	//cout<<"Haciendo mejoras"<<endl;
 	improvements = mejorar(nodes,&graph,&prevs,&backprevs,best);
 	final = add(&path,&improvements);
-	//cout<<"####"<<endl;
+
+	// dar resultados
 	ganancia = profit(final,&graph);
 	if(ganancia>max){
 		cout<<ganancia<<endl;
 		for(int i=0;i<final.size();i++)cout<<final[i]<<' ';
 			cout<<endl;
+		bandb(&graph,&final,ganancia);
 	}else{
 		cout<<max<<endl;
 		for(int i=0;i<path.size();i++)cout<<path[i]<<' ';
 		cout<<endl;
+		bandb(&graph,&path,max);
 	}
-	/*
-	if(dinR)//CkR[0] esta en solucion
-	dfs(depo,&Gr, &CkR,nodes); //Notar que en CkR[0] estara V0 (Componente con el deposito)
-	else{
-		//bestCompCost(depo, &graph, &CkR, &prevs);
-	}
-	BCk.resize(CkR.size(),0);
-	cout<<"Recorrido"<<endl;
-	vector<int> printed(110,0);
-	int c = 0;
-	
-	for(vector<vector<int> >::iterator comp = CkR.begin();
-		comp!=CkR.end(); ++comp,c++)
-	{	
-		cout<<"Componente "<< c << endl;
-		for(int i=0;i<comp->size();i++){
-			printed[(*comp)[i]]=1;
-			for(int j=1; j<Gr[(*comp)[i]].size(); j++){
-				if(Gr[(*comp)[i]][j].cost!=-1 && printed[j]==0 ){
-					BCk[c] += Gr[(*comp)[i]][j].value - Gr[(*comp)[i]][j].cost;
-					cout<<(*comp)[i]<<' '<<j<<' '<<Gr[(*comp)[i]][j].cost<<' '<<Gr[(*comp)[i]][j].value<<endl;
-				}
-			}
-		}
-		cout<<"Beneficio: "<<BCk[c]<<endl;
-	}
-	*/
+	//for(int i=0;i<graph[0].size();i++)cout<<graph[10][i].second<<' ';
 }
