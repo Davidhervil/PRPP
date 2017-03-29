@@ -18,7 +18,7 @@ bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 		ant=solParcial[i];
 	}
 	if(marked[e.first][e.second]==-1){
-		return false
+		return false;
 	}
 	else if(marked[e.first][e.second]==0){
 		if(be == 0){
@@ -31,6 +31,7 @@ bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 }
 
 bool cumple_acota(Graph *graph, int v, int e,int be, int ce, int benef){
+	int beneficioE, beneficioSolP, beneficioMax;
 	beneficioE    = be-ce;
 	beneficioSolP = benef + beneficioE;
 	beneficioMax  = beneficioDisponible - max(0,be-ce) + beneficioSolP;
@@ -72,8 +73,8 @@ int busqueda(Graph *graph){
 	sort(sucesores.begin(), sucesores.end(), comparador);		// Ordenar sucesores de mayor a menor.
 
 	for(int i=0; i<sucesores.size(); i++){					// Recorrer desde el ultimo.
-		e  = sucesores[i].first(); 							// Aqui esta el nodo a verificar (Bueno, la arista)
-		be = sucessores[i].second();
+		e  = sucesores[i].first; 							// Aqui esta el nodo a verificar (Bueno, la arista)
+		be = sucesores[i].second;
 		ce = (*graph)[v][e].cost;
 		if(!cumple_acota(graph,v,e,be,ce,benef) &&
 			!esta_lado_en_sol_parcial(make_pair(v,e),be)) {		 
@@ -95,5 +96,9 @@ int bandb(Graph *G, vector<int> solInicial, int benInicial){
 	mayorBen = benInicial;
 	beneficioDisponible = mayor_ben_grafo(G);		///// ??????
 	busqueda(G);										///// ??????
+	cout<<mayorBen<<endl;
+	for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
+		cout<<endl;
 }
+
 
