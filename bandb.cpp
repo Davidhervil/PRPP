@@ -7,16 +7,15 @@
 using namespace std;
 typedef vector<vector<pair <int,int> > > Graph;
 
-bool esta_lado_en_sol_parcial(vector<int> sparcial, pair<int,int> e, int be){
+bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 	int marked[110][110];
 	int ant;
-	ant = sparcial[0];
+	ant = solParcial[0];
 	memset(marked,-1,sizeof(marked));
-
-	for(int i=1;i<sparcial.size();i++){
-		marked[ant][sparcial[i]] += 1;
-		marked[sparcial[i]][ant] += 1;
-		ant=sparcial[i];
+	for(int i=1;i<solParcial.size();i++){
+		marked[ant][solParcial[i]] += 1;
+		marked[solParcial[i]][ant] += 1;
+		ant=solParcial[i];
 	}
 	if(marked[e.first][e.second]==-1){
 		return false
@@ -29,13 +28,10 @@ bool esta_lado_en_sol_parcial(vector<int> sparcial, pair<int,int> e, int be){
 		}
 	}
 	return true;
-
 }
 
-bool cumple_acota(Graph *graph, int v, int e, int benef){
-	be = (*graph)[v][e].value;
-	e  = (*graph)[v][e].cost;
-	beneficioE    = (*graph);
+bool cumple_acota(Graph *graph, int v, int e,int be, int ce, int benef){
+	beneficioE    = be-ce;
 	beneficioSolP = benef + beneficioE;
 	beneficioMax  = beneficioDisponible - max(0,be-ce) + beneficioSolP;
 	return beneficioMax > mayorBen;
@@ -77,9 +73,10 @@ int busqueda(Graph *graph){
 
 	for(int i=0; i<sucesores.size(); i++){					// Recorrer desde el ultimo.
 		e  = sucesores[i].first(); 							// Aqui esta el nodo a verificar (Bueno, la arista)
-		be = (*graph)[v][e].value;
+		be = sucessores[i].second();
 		ce = (*graph)[v][e].cost;
-		if(verificaciones){		 
+		if(!cumple_acota(graph,v,e,be,ce,benef) &&
+			!esta_lado_en_sol_parcial(make_pair(v,e)),be) {		 
 			solParcial.pb(e);	 							// Agregar a la solucion parcial.
 			beneficioDisponible -= max(0,be-ce);
 			busqueda(G);									// ?????????????????
