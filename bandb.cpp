@@ -10,7 +10,7 @@ typedef vector<vector<pair <int,int> > > Graph;
 /* Funcion que obtiene el beneficio total de una solucion p. 
 */
 
-int visitados(vector<int> p, int (*marked)[][],Graph *G){
+int visitados(vector<int> p, int (*marked)[110][110],Graph *G){
 	int total=0,last=p[0];
 	for(int i=1;i<p.size();i++){
 		total += (-marked[last][p[i]])*(*G)[last][p[i]].value - (*G)[last][p[i]].cost;
