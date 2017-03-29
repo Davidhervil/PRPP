@@ -8,6 +8,15 @@ using namespace std;
 typedef vector<vector<pair <int,int> > > Graph;
 
 
+bool cumple_acota(Graph *graph, int v, int e, int benef){
+	be = (*graph)[v][e].value;
+	e  = (*graph)[v][e].cost;
+	beneficioE    = (*graph);
+	beneficioSolP = benef + beneficioE;
+	beneficioMax  = beneficioDisponible - max(0,be-ce) + beneficioSolP;
+	return beneficioMax > mayorBen;
+}
+
 /* Recibe par(nodo,beneficio) y lo ordena de mayor a menor*/
 bool comparador (pair <int,int> i,pair <int,int> j) {return (i.value>j.value); }
 
