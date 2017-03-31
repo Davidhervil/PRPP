@@ -574,11 +574,11 @@ int busqueda(Graph *graph){
 	cout<<endl<<"Disponible: "<<beneficioDisponible<<"   "<<endl;
 	// ALGORITMO
 	v = solParcial.back();					// El vertice mas externo de la solucion parcial
-	if(v == 1 && benef > mayorBen){			// Si llegamos al deposito.			
+	if(v == 1){			// Si llegamos al deposito.			
 		benef = profit(solParcial,graph);	// Hallar beneficio actual (MEJORABLE)
 		if (benef > mayorBen){				// Reasignar mejor solucion
 			mejorSol = solParcial;			// Guardar mejor camino.
-			mayorBen = benef;				// Hallar beneficio actual (MEJORABLE)
+			mayorBen = benef;				// Hallar beneficio actual
 		}							
 	}
 	for(int i=1;i<(*graph)[v].size();i++){	// Crear lista de sucesores
@@ -607,7 +607,6 @@ int busqueda(Graph *graph){
 		}
 	}
 	if (solParcial.size()!=0){
-		countBusq -= 1;
 		ultimo = solParcial.back();
 		solParcial.pop_back();
 	}
