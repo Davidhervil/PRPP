@@ -452,7 +452,7 @@ vector<int> add(vector<int> *path,vector<vector<int> > *mejoras){
 	}
 	return final;
 }
-
+/*
 vector<int> elim_ciclos_neg(vector<int> path,Graph *G){//INCOMPLETO
 	int marked[110][110],total=0,last=p[0],n=path.size();
 	int node,cyclecost=0,ant;
@@ -467,7 +467,7 @@ vector<int> elim_ciclos_neg(vector<int> path,Graph *G){//INCOMPLETO
 	}
 	return path;
 }
-
+*/
 /* Funcion que obtiene el beneficio total de una solucion p. 
 */
 int profit(vector<int> p,Graph *G){
@@ -508,19 +508,20 @@ bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 	return true;
 }
 
-bool repite_ciclo(int e, Graph *G){
-	int n=solpar.size(),ant;
+bool no_repite_ciclo(int e, Graph *G){
+	int marked[110][110];
+	int n=solParcial.size(),ant;
 	memset(marked,-1,sizeof(marked));
-	ant = solpar[n-1];
+	ant = solParcial[n-1];
 	for(int i=n-2;i>=0;i--){
-		if(solpar[i]){	
-			if ((*G)[e][solpar[n-1]].value-(*G)[e][solpar[n-1]].cost < (*G)[ant][solpar[i]].value-(*G)[ant][solpar[i]].cost){
-				return false
+		if(solParcial[i]){	
+			if ((*G)[e][solParcial[n-1]].value-(*G)[e][solParcial[n-1]].cost < (*G)[ant][solParcial[i]].value-(*G)[ant][solParcial[i]].cost){
+				return false;
 			}else{
 				return true;
 			}
 		}
-		ant = solpar[i];
+		ant = solParcial[i];
 	}
 	return false;
 }
@@ -596,11 +597,13 @@ int busqueda(Graph *graph){
 		be = sucesores[i].second;
 		ce = (*graph)[v][e].cost;
 		if(cumple_acota(graph,v,e,be,ce,benef) &&
-			!esta_lado_en_sol_parcial(make_pair(v,e),be)&&!ciclo_negativo(e,graph)) {		 
-			solParcial.pb(e);	 							// Agregar a la solucion parcial.
-			beneficioDisponible -= max(0,be-ce);
-			busqueda(graph);	
-			beneficioDisponible += max(0,be-ce);								// ?????????????????
+			!esta_lado_en_sol_parcial(make_pair(v,e),be)&&
+			!ciclo_negativo(e,graph) &&
+			!no_repite_ciclo(e,graph)) {		 
+				solParcial.pb(e);	 							// Agregar a la solucion parcial.
+				beneficioDisponible -= max(0,be-ce);
+				busqueda(graph);	
+				beneficioDisponible += max(0,be-ce);								// ?????????????????
 		}
 	}
 	if (solParcial.size()!=0){
