@@ -18,6 +18,7 @@ typedef vector<pair<int,int> > connections;
 typedef vector<vector<pair <int,int> > > Graph;
 int beneficioDisponible, mayorBen,countBusq;
 vector<int> solParcial (1,1);
+vector<int> benParcial (1,0);
 vector<int> mejorSol;
 
 /* 	Este dfs modifica conexComp quedando con las listas de los nodos que componen
@@ -483,7 +484,17 @@ int profit(vector<int> p,Graph *G){
 
 /* Procedimiento principal
 */
-
+int mayor_ben_grafo(Graph *graph){
+	float r=0;
+	for(int i=0;i<(*graph)[0].size();i++){
+		for(int j=0;j<(*graph)[0].size();j++){
+			if ((*graph)[i][j].value>=0) {
+				r += max(0.0,(float)((*graph)[i][j].value - (*graph)[i][j].cost)/2.0);
+			}
+		}
+	}
+	return (int)r;
+}
 
 bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 	int marked[110][110];
@@ -495,26 +506,31 @@ bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 		marked[solParcial[i]][ant] += 1;
 		ant=solParcial[i];
 	}
+	//cout<<"En: "<<endl;
+	//for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
+	//cout<<endl;
 	if(marked[e.first][e.second]==-1){
+	//	cout<<"NO ESTA "<<e.first<<'-'<<e.second<<endl;
+	//	cout<<marked[e.first][e.second]<<endl;
 		return false;
 	}
 	else if(marked[e.first][e.second]==0){
-		if(be == 0){
-			return false;
-		}else{
-			return true;
-		}
+	//	cout<<"ESTA 1 VEZ "<<e.first<<'-'<<e.second<<endl;
+	//	cout<<marked[e.first][e.second]<<endl;
+		return false;
 	}
+	//cout<<"ESTA "<<e.first<<'-'<<e.second<<endl;
+	//cout<<marked[e.first][e.second]<<endl;
 	return true;
 }
 
-bool no_repite_ciclo(int e, Graph *G){
+bool repite_ciclo(int e, Graph *G){
 	int marked[110][110];
 	int n=solParcial.size(),ant;
 	memset(marked,-1,sizeof(marked));
 	ant = solParcial[n-1];
 	for(int i=n-2;i>=0;i--){
-		if(solParcial[i]){	
+		if(solParcial[i] == e){	
 			if ((*G)[e][solParcial[n-1]].value-(*G)[e][solParcial[n-1]].cost < (*G)[ant][solParcial[i]].value-(*G)[ant][solParcial[i]].cost){
 				return false;
 			}else{
@@ -526,7 +542,7 @@ bool no_repite_ciclo(int e, Graph *G){
 	return false;
 }
 
-bool cumple_acota(Graph *graph, int v, int e,int be, int ce, int benef){
+bool cumple_acota(Graph *graph, int e,int be, int ce, int benef){
 	int beneficioE, beneficioSolP, beneficioMax;
 	bool b;
 	beneficioE    = be-ce;					// Ganancia de recorrer la arista
@@ -566,12 +582,13 @@ int busqueda(Graph *graph){
 		mayorBen
 	*/
 	// Locales:
-	vector<pair <int,int> > sucesores;						// Vector de sucesores con sus beneficios.
+	vector<pair <int,int> > sucesores;		// Vector de sucesores con sus beneficios.
 	int s,b1,b2,be,ce,benef,v,e, ultimo, penultimo;							
 
 	// ALGORITMO
 	v = solParcial.back();					// El vertice mas externo de la solucion parcial
-	if(v == 1){			// Si llegamos al deposito.			
+	if(v == 1){
+		cout<<"SOLU"<<endl;								// Si llegamos al deposito.			
 		benef = profit(solParcial,graph);	// Hallar beneficio actual (MEJORABLE)
 		for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
 		cout<<endl<<"mayor: "<<mayorBen<<"   "<<endl;
@@ -583,52 +600,48 @@ int busqueda(Graph *graph){
 		}							
 	}
 	for(int i=1;i<(*graph)[v].size();i++){	// Crear lista de sucesores
-		s = (*graph)[v][i].value; 			// 
-		if ( s != -1){
-			b1 = (*graph)[v][i].value;	// calcular beneficio nuevo
-			sucesores.pb(make_pair(i,b1));								// Agregar vecinos.
+		b1 = (*graph)[v][i].value; 			// 
+		if ( b1 != -1){
+			sucesores.pb(make_pair(i,b1));	// Agregar vecinos.
 			sucesores.pb(make_pair(i,0));
 		}
 	}
 
 	sort(sucesores.begin(), sucesores.end(), comparador);	// Ordenar sucesores de mayor a menor.
+	//for(int i=0;i<sucesores.size();i++)cout<<sucesores[i].first<<","<<sucesores[i].second<<' ';
+	//cout<<endl;
+	benef = profit(solParcial,graph);
 	for(int i=0; i<sucesores.size(); i++){					// Recorrer desde el ultimo.
 		e  = sucesores[i].first; 							// Aqui esta el nodo a verificar (Bueno, la arista)
 		be = sucesores[i].second;
 		ce = (*graph)[v][e].cost;
-		if(cumple_acota(graph,v,e,be,ce,benef) &&
-			!esta_lado_en_sol_parcial(make_pair(v,e),be)&&
-			!ciclo_negativo(e,graph)&&
-			!no_repite_ciclo(e,graph)) {		 
-				solParcial.pb(e);	 							// Agregar a la solucion parcial.
+		if((cumple_acota(graph,e,be,ce,benef) &&			// Verificaciones.
+			!ciclo_negativo(e,graph) &&
+			!repite_ciclo(e,graph) &&
+			!esta_lado_en_sol_parcial(make_pair(v,e),be))) {		 
+				solParcial.pb(e);							// Agregar al camino parcial
+				benParcial.pb(max(0,be-ce));	 			// Agregar al beneficio parcial.
 				beneficioDisponible -= max(0,be-ce);
 				busqueda(graph);	
-				beneficioDisponible += max(0,be-ce);								// ?????????????????
 		}
 	}
-	if (solParcial.size()!=0){
-		ultimo = solParcial.back();
+	for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
+	cout<<endl;
+	if (solParcial.size()!=0){					// Si hay elementos en el camino.
+		ultimo = benParcial.back();				// Beneficio de la ultima arista
+		beneficioDisponible += max(0,ultimo);	// Aumentar el beneficio disponible.
+		benParcial.pop_back();					// 
 		solParcial.pop_back();
 	}
 }
 
-int mayor_ben_grafo(Graph *graph){
-	int r=0;
-	for(int i=0;i<(*graph)[0].size();i++){
-		for(int j=0;j<(*graph)[0].size();j++){
-			if ((*graph)[i][j].value>=0) {
-				r += max(0,((*graph)[i][j].value - (*graph)[i][j].cost)/2);
-			}
-		}
-	}
-	return r;
-}
 int bandb(Graph *G, vector<int> *solInicial, int benInicial){
-	mejorSol = (*solInicial);
-	mayorBen = benInicial;
+	vector<int> v (1,1);
+	mejorSol = v; //(*solInicial);
+	mayorBen = 0;//benInicial;
 	beneficioDisponible = mayor_ben_grafo(G);		///// ??????
 	busqueda(G);										///// ??????
-		cout<<"chao busqueda"<<endl;
+	cout<<"chao busqueda"<<endl;
 	cout<<mayorBen<<endl;
 	for(int i=0;i<mejorSol.size();i++)cout<<mejorSol[i]<<' ';
 		cout<<endl;
