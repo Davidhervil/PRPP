@@ -503,6 +503,23 @@ int profit(vector<int> p,Graph *G){
 /* Procedimiento principal
 */
 
+bool ciclo_negativo(vector<int> solpar, int e, Graph *G){
+	int marked[110][110];
+	int n=solpar.size(),revenue=0,ant;
+	memset(marked,-1,sizeof(marked));
+	ant = solpar[n-1];
+	revenue += (*G)[e][solpar[n-1]].value-(*G)[e][solpar[n-1]].cost;
+	for(int i=n-2;i>=0;i--){
+		revenue+= (-marked[ant][solpar[i]])*(*G)[ant][solpar[i]].value-(*G)[ant][solpar[i]].cost;
+		marked[ant][solpar[i]] = 0;
+		marked[solpar[i]][ant] = 0;
+		if (solpar[i]==e){
+			if(revenue<0)return true;
+		}
+		ant = solpar[i];
+	}
+	return false;
+}
 
 bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 	int marked[110][110];
