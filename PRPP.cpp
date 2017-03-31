@@ -569,13 +569,14 @@ int busqueda(Graph *graph){
 	vector<pair <int,int> > sucesores;						// Vector de sucesores con sus beneficios.
 	int s,b1,b2,be,ce,benef,v,e, ultimo, penultimo;							
 
-	for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
-	cout<<endl<<"mayor: "<<mayorBen<<"   "<<endl;
-	cout<<endl<<"Disponible: "<<beneficioDisponible<<"   "<<endl;
 	// ALGORITMO
 	v = solParcial.back();					// El vertice mas externo de la solucion parcial
 	if(v == 1){			// Si llegamos al deposito.			
 		benef = profit(solParcial,graph);	// Hallar beneficio actual (MEJORABLE)
+		for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
+		cout<<endl<<"mayor: "<<mayorBen<<"   "<<endl;
+		cout<<"Disponible: "<<beneficioDisponible<<"   "<<endl;
+		cout<<"Beneficio: "<<benef<<"   "<<endl;
 		if (benef > mayorBen){				// Reasignar mejor solucion
 			mejorSol = solParcial;			// Guardar mejor camino.
 			mayorBen = benef;				// Hallar beneficio actual
@@ -584,10 +585,9 @@ int busqueda(Graph *graph){
 	for(int i=1;i<(*graph)[v].size();i++){	// Crear lista de sucesores
 		s = (*graph)[v][i].value; 			// 
 		if ( s != -1){
-			b1 = (*graph)[v][i].value - (*graph)[v][i].cost;	// calcular beneficio nuevo
-			b2 = (*graph)[v][i].cost;							// Calcular beneficio nuevo
+			b1 = (*graph)[v][i].value;	// calcular beneficio nuevo
 			sucesores.pb(make_pair(i,b1));								// Agregar vecinos.
-			sucesores.pb(make_pair(i,b2));
+			sucesores.pb(make_pair(i,0));
 		}
 	}
 
@@ -598,7 +598,7 @@ int busqueda(Graph *graph){
 		ce = (*graph)[v][e].cost;
 		if(cumple_acota(graph,v,e,be,ce,benef) &&
 			!esta_lado_en_sol_parcial(make_pair(v,e),be)&&
-			!ciclo_negativo(e,graph) &&
+			!ciclo_negativo(e,graph)&&
 			!no_repite_ciclo(e,graph)) {		 
 				solParcial.pb(e);	 							// Agregar a la solucion parcial.
 				beneficioDisponible -= max(0,be-ce);
