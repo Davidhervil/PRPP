@@ -4,6 +4,7 @@
 #include <vector>
 #include <string.h>
 #include <algorithm>
+#include <set>
 
 #define cost first
 #define value second
@@ -525,20 +526,20 @@ bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 }
 
 bool repite_ciclo(int e, Graph *G){
-	int marked[110][110];
+	int marked[110][110],tamventana=2;
 	int n=solParcial.size(),ant;
+	set<int> enciclo,enventana;
 	memset(marked,-1,sizeof(marked));
 	ant = solParcial[n-1];
 	for(int i=n-2;i>=0;i--){
-		if(solParcial[i] == e){	
-			if ((*G)[e][solParcial[n-1]].value-(*G)[e][solParcial[n-1]].cost < (*G)[ant][solParcial[i]].value-(*G)[ant][solParcial[i]].cost){
-				return false;
-			}else{
-				return true;
-			}
+		if(solParcial[i]==e){
+			tamventana++;
+			break;
 		}
-		ant = solParcial[i];
+		enciclo.insert(solParcial[i]);
+		tamventana++;
 	}
+	
 	return false;
 }
 
@@ -554,18 +555,28 @@ bool cumple_acota(Graph *graph, int e,int be, int ce, int benef){
 
 bool ciclo_negativo(int e, Graph *G){
 	int marked[110][110];
-	int n=solParcial.size(),revenue=0,ant;
+	int n=solParcial.size(),revenue=0,ultimoben=0,ant,last;
+	bool encontre=0;
+	solParcial.pb(e);
 	memset(marked,-1,sizeof(marked));
-	ant = solParcial[n-1];
-	revenue += (*G)[e][solParcial[n-1]].value-(*G)[e][solParcial[n-1]].cost;
-	for(int i=n-2;i>=0;i--){
-		revenue+= (-marked[ant][solParcial[i]])*(*G)[ant][solParcial[i]].value-(*G)[ant][solParcial[i]].cost;
-		marked[ant][solParcial[i]] = 0;
-		marked[solParcial[i]][ant] = 0;
-		if (solParcial[i]==e){
-			if(revenue<0)return true;
+
+	for(int i=1;i<solParcial.size();i++){
+		if(encontre){
+			revenue += (-marked[ant][solParcial[i]])*(*G)[ant][solParcial[i]].value-(*G)[ant][solParcial[i]].cost;
+			if(solParcial[i]==e){
+				ultimoben = revenue;
+				revenue = 0;
+			}		
 		}
-		ant = solParcial[i];
+		if(solParcial[i]==e && !encontre){
+			encontre = true;
+		}
+		marked[last][solParcial[i]] = marked[solParcial[i]][last] = 0;
+		last = solParcial[i];
+	}
+	solParcial.pop_back();
+	if(ultimoben<0){
+		return true;
 	}
 	return false;
 }
