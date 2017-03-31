@@ -508,7 +508,7 @@ bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 	return true;
 }
 
-bool no_repite_ciclo(int e, Graph *G){
+bool repite_ciclo(int e, Graph *G){
 	int n=solpar.size(),ant;
 	memset(marked,-1,sizeof(marked));
 	ant = solpar[n-1];
