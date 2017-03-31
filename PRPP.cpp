@@ -617,7 +617,9 @@ int mayor_ben_grafo(Graph *graph){
 	int r=0;
 	for(int i=0;i<(*graph)[0].size();i++){
 		for(int j=0;j<(*graph)[0].size();j++){
-			r += (max(0,(*graph)[i][j].value - (*graph)[i][j].cost ))/2;
+			if ((*graph)[i][j].value>=0) {
+				r += max(0,((*graph)[i][j].value - (*graph)[i][j].cost)/2);
+			}
 		}
 	}
 	return r;
