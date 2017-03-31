@@ -452,6 +452,22 @@ vector<int> add(vector<int> *path,vector<vector<int> > *mejoras){
 	}
 	return final;
 }
+
+vector<int> elim_ciclos_neg(vector<int> path,Graph *G){//INCOMPLETO
+	int marked[110][110],total=0,last=p[0],n=path.size();
+	int node,cyclecost=0,ant;
+	for(int i=0;i<n;i++){
+		node = path[i];
+		ant=node;
+		cyclecost=0;
+		
+		for(int j=i+1;j<n;j++){
+			
+		}
+	}
+	return path;
+}
+
 /* Funcion que obtiene el beneficio total de una solucion p. 
 */
 int profit(vector<int> p,Graph *G){
@@ -507,6 +523,23 @@ bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 		}
 	}
 	return true;
+}
+
+bool no_repite_ciclo(int e, Graph *G){
+	int n=solpar.size(),ant;
+	memset(marked,-1,sizeof(marked));
+	ant = solpar[n-1];
+	for(int i=n-2;i>=0;i--){
+		if(solpar[i]){	
+			if ((*G)[e][solpar[n-1]].value-(*G)[e][solpar[n-1]].cost < (*G)[ant][solpar[i]].value-(*G)[ant][solpar[i]].cost){
+				return false
+			}else{
+				return true;
+			}
+		}
+		ant = solpar[i];
+	}
+	return false;
 }
 
 bool cumple_acota(Graph *graph, int v, int e,int be, int ce, int benef){
