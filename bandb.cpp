@@ -1,3 +1,11 @@
+#include <iostream>
+#include <stdio.h>
+#include <stack>
+#include <vector>
+#include <string.h>
+#include <algorithm>
+using namespace std;
+typedef vector<vector<pair <int,int> > > Graph;
 
 bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 	int marked[110][110];
