@@ -16,7 +16,7 @@
 using namespace std;
 typedef vector<pair<int,int> > connections;
 typedef vector<vector<pair <int,int> > > Graph;
-int beneficioDisponible, mayorBen;
+int beneficioDisponible, mayorBen,countBusq;
 vector<int> solParcial (1,1);
 vector<int> mejorSol;
 
@@ -319,42 +319,7 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 	//	cout<<endl;
 	return distances;
 }
-/*	Algoritmo de Floyd-Warshall para costo minimo entre todos los nodos.
-	Fue pensado util durante el inicio del proyecto.
-*/
-void fldWrshllC(int nodes,int (*gf)[110][110][2], int (*cR)[110][110], int (*cP)[110][110], Graph *g){
-	//cout<<"Empezando"<<endl;
-	for(int i = 1;i<=nodes;i++){
-		for(int j= 1; j<=nodes;j++){
-			(*cP)[i][j] = -1;
-			if(j==i){
-				(*cR)[j][j] = 0;
-			}
-			else{
-				if((*g)[i][j].cost!=-1){
-					(*cR)[i][j] = (*cR)[j][i] = (*g)[i][j].cost;
-					(*cP)[i][j] = j;
-				}else{
-					(*cR)[i][j] = INF;
-				}
-			}
-		}
-	}
-	//cout<<"Floydeando"<<endl;
-	for (int k = 1; k <= nodes; k++)
-	{	
-		for (int i = 1; i <= nodes; i++)
-		{
-			for (int j = 1; j <= nodes; j++)
-			{
-				if((*cR)[i][j]>(*cR)[i][k]+(*cR)[k][j]){
-					(*cR)[i][j] = (*cR)[i][k]+(*cR)[k][j];
-					(*cP)[i][j] = (*cP)[i][k];
-				}
-			}
-		}
-	}
-}
+
 /* 	Este procedimiento reconstruye en una lista de nodos 
 	el ciclo resultante de los dos caminos parciales de ida y vuelta desde node
 */
@@ -529,10 +494,12 @@ bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 
 bool cumple_acota(Graph *graph, int v, int e,int be, int ce, int benef){
 	int beneficioE, beneficioSolP, beneficioMax;
-	beneficioE    = be-ce;
-	beneficioSolP = benef + beneficioE;
-	beneficioMax  = beneficioDisponible - max(0,be-ce) + beneficioSolP;
-	return beneficioMax > mayorBen;
+	bool b;
+	beneficioE    = be-ce;					// Ganancia de recorrer la arista
+	beneficioSolP = benef + beneficioE;		// 
+	beneficioMax  = beneficioDisponible - max(0,beneficioE) + beneficioSolP;
+	b = beneficioMax> mayorBen;
+	return b;
 }
 
 /* Recibe par(nodo,beneficio) y lo ordena de mayor a menor*/
@@ -548,8 +515,8 @@ int busqueda(Graph *graph){
 	*/
 	// Locales:
 	vector<pair <int,int> > sucesores;						// Vector de sucesores con sus beneficios.
-	int s,b1,b2,be,ce,benef,v,e;											
-
+	int s,b1,b2,be,ce,benef,v,e, ultimo, penultimo;											
+	for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';cout<<endl;
 	// ALGORITMO
 	v = solParcial.back();									// El vertice mas externo de la solucion parcial
 	benef = profit(solParcial,graph);						// Hallar beneficio actual (MEJORABLE)
@@ -557,32 +524,37 @@ int busqueda(Graph *graph){
 		mejorSol = solParcial;
 		mayorBen = benef;									
 	}
-
+	countBusq += 1;
 	for(int i=1;i<(*graph)[v].size();i++){						// Crear lista de sucesores
 		s = (*graph)[v][i].value;
 		if ( s != -1){
 			b1 = benef + (*graph)[v][i].value - (*graph)[v][i].cost;	// calcular beneficio nuevo
 			b2 = benef - (*graph)[v][i].cost;						// Calcular beneficio nuevo
+			if(v==2){
+			}
 			sucesores.pb(make_pair(i,b1));						// Agregar vecinos.
 			sucesores.pb(make_pair(i,b2));
 		}
 	}
-	sort(sucesores.begin(), sucesores.end(), comparador);		// Ordenar sucesores de mayor a menor.
 
+	sort(sucesores.begin(), sucesores.end(), comparador);	// Ordenar sucesores de mayor a menor.
 	for(int i=0; i<sucesores.size(); i++){					// Recorrer desde el ultimo.
 		e  = sucesores[i].first; 							// Aqui esta el nodo a verificar (Bueno, la arista)
 		be = sucesores[i].second;
 		ce = (*graph)[v][e].cost;
-		if(!cumple_acota(graph,v,e,be,ce,benef) &&
+		if(cumple_acota(graph,v,e,be,ce,benef) &&
 			!esta_lado_en_sol_parcial(make_pair(v,e),be)) {		 
 			solParcial.pb(e);	 							// Agregar a la solucion parcial.
 			beneficioDisponible -= max(0,be-ce);
-			busqueda(graph);									// ?????????????????
+			busqueda(graph);	
+			beneficioDisponible += max(0,be-ce);								// ?????????????????
 		}
 	}
-	beneficioDisponible += max(0,be-ce);
-	sucesores.pop_back();
-
+	if (solParcial.size()!=0){
+		countBusq -= 1;
+		ultimo = solParcial.back();
+		solParcial.pop_back();
+	}
 }
 
 int mayor_ben_grafo(Graph *graph){
@@ -599,14 +571,14 @@ int bandb(Graph *G, vector<int> *solInicial, int benInicial){
 	mayorBen = benInicial;
 	beneficioDisponible = mayor_ben_grafo(G);		///// ??????
 	busqueda(G);										///// ??????
+		cout<<"chao busqueda"<<endl;
 	cout<<mayorBen<<endl;
-	for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
+	for(int i=0;i<mejorSol.size();i++)cout<<mejorSol[i]<<' ';
 		cout<<endl;
 }
 
 
 int main(){
-
 	int graphFloyd[110][110][2],bene4Floyd[110][110],costPaths[110][110];
 	int costResult[110][110],beneResult[110][110],benePaths[110][110];
 	Graph graph(110,connections(110,mp(-1,-1)));
@@ -637,7 +609,6 @@ int main(){
 		graph[v1][v2] = mp(cost,value);
 		graph[v2][v1] = mp(cost,value);
 	}
-	//for(int i=0;i<graph[0].size();i++)cout<<graph[0][i].second<<' ';         ////////////////////////////////
 	bellResult 	 = bellman(nodes,depo,&graph, &prevs);
 	backResult 	 = regreso(nodes,depo,&graph,&prevs,&backprevs);
 	bestbackpath = backprevs;
@@ -654,21 +625,23 @@ int main(){
 			bestbackpath = backprevs;
 		}
 	}
-	//printpath(prevs,best);
-	//printpath(bestbackpath,depo);
-	//cout<<max<<endl;
+
 	path = constructPath(bestbackpath,prevs,depo);
 	improvements = mejorar(nodes,&graph,&prevs,&backprevs,best);
 	final = add(&path,&improvements);
 
 	// dar resultados
 	ganancia = profit(final,&graph);
+	//for(int i=0;i<path.size();i++)cout<<path[i]<<' ';
 	if(ganancia>max){
+		//return ganancia;
 		cout<<ganancia<<endl;
 		for(int i=0;i<final.size();i++)cout<<final[i]<<' ';
 			cout<<endl;
+
 		bandb(&graph,&final,ganancia);
 	}else{
+		//return max;
 		cout<<max<<endl;
 		for(int i=0;i<path.size();i++)cout<<path[i]<<' ';
 		cout<<endl;
