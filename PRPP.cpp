@@ -468,23 +468,6 @@ int profit(vector<int> p,Graph *G){
 /* Procedimiento principal
 */
 
-bool ciclo_negativo(vector<int> solpar, int e, Graph *G){
-	int marked[110][110];
-	int n=solpar.size(),revenue=0,ant;
-	memset(marked,-1,sizeof(marked));
-	ant = solpar[n-1];
-	revenue += (*G)[e][solpar[n-1]].value-(*G)[e][solpar[n-1]].cost;
-	for(int i=n-2;i>=0;i--){
-		revenue+= (-marked[ant][solpar[i]])*(*G)[ant][solpar[i]].value-(*G)[ant][solpar[i]].cost;
-		marked[ant][solpar[i]] = 0;
-		marked[solpar[i]][ant] = 0;
-		if (solpar[i]==e){
-			if(revenue<0)return true;
-		}
-		ant = solpar[i];
-	}
-	return false;
-}
 
 bool esta_lado_en_sol_parcial(pair<int,int> e, int be){
 	int marked[110][110];
@@ -519,6 +502,24 @@ bool cumple_acota(Graph *graph, int v, int e,int be, int ce, int benef){
 	return b;
 }
 
+bool ciclo_negativo(int e, Graph *G){
+	int marked[110][110];
+	int n=solParcial.size(),revenue=0,ant;
+	memset(marked,-1,sizeof(marked));
+	ant = solParcial[n-1];
+	revenue += (*G)[e][solParcial[n-1]].value-(*G)[e][solParcial[n-1]].cost;
+	for(int i=n-2;i>=0;i--){
+		revenue+= (-marked[ant][solParcial[i]])*(*G)[ant][solParcial[i]].value-(*G)[ant][solParcial[i]].cost;
+		marked[ant][solParcial[i]] = 0;
+		marked[solParcial[i]][ant] = 0;
+		if (solParcial[i]==e){
+			if(revenue<0)return true;
+		}
+		ant = solParcial[i];
+	}
+	return false;
+}
+
 /* Recibe par(nodo,beneficio) y lo ordena de mayor a menor*/
 bool comparador (pair <int,int> i,pair <int,int> j) {return (i.value>j.value); }
 
@@ -532,24 +533,26 @@ int busqueda(Graph *graph){
 	*/
 	// Locales:
 	vector<pair <int,int> > sucesores;						// Vector de sucesores con sus beneficios.
-	int s,b1,b2,be,ce,benef,v,e, ultimo, penultimo;											
-	for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';cout<<endl;
+	int s,b1,b2,be,ce,benef,v,e, ultimo, penultimo;							
+
+	for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
+	cout<<endl<<"mayor: "<<mayorBen<<"   "<<endl;
+	cout<<endl<<"Disponible: "<<beneficioDisponible<<"   "<<endl;
 	// ALGORITMO
-	v = solParcial.back();									// El vertice mas externo de la solucion parcial
-	benef = profit(solParcial,graph);						// Hallar beneficio actual (MEJORABLE)
-	if(v == 1 && benef > mayorBen){							// Reasignar mejor solucion
-		mejorSol = solParcial;
-		mayorBen = benef;									
+	v = solParcial.back();					// El vertice mas externo de la solucion parcial
+	if(v == 1 && benef > mayorBen){			// Si llegamos al deposito.			
+		benef = profit(solParcial,graph);	// Hallar beneficio actual (MEJORABLE)
+		if (benef > mayorBen){				// Reasignar mejor solucion
+			mejorSol = solParcial;			// Guardar mejor camino.
+			mayorBen = benef;				// Hallar beneficio actual (MEJORABLE)
+		}							
 	}
-	countBusq += 1;
-	for(int i=1;i<(*graph)[v].size();i++){						// Crear lista de sucesores
-		s = (*graph)[v][i].value;
+	for(int i=1;i<(*graph)[v].size();i++){	// Crear lista de sucesores
+		s = (*graph)[v][i].value; 			// 
 		if ( s != -1){
-			b1 = benef + (*graph)[v][i].value - (*graph)[v][i].cost;	// calcular beneficio nuevo
-			b2 = benef - (*graph)[v][i].cost;						// Calcular beneficio nuevo
-			if(v==2){
-			}
-			sucesores.pb(make_pair(i,b1));						// Agregar vecinos.
+			b1 = (*graph)[v][i].value - (*graph)[v][i].cost;	// calcular beneficio nuevo
+			b2 = (*graph)[v][i].cost;							// Calcular beneficio nuevo
+			sucesores.pb(make_pair(i,b1));								// Agregar vecinos.
 			sucesores.pb(make_pair(i,b2));
 		}
 	}
@@ -560,7 +563,7 @@ int busqueda(Graph *graph){
 		be = sucesores[i].second;
 		ce = (*graph)[v][e].cost;
 		if(cumple_acota(graph,v,e,be,ce,benef) &&
-			!esta_lado_en_sol_parcial(make_pair(v,e),be)) {		 
+			!esta_lado_en_sol_parcial(make_pair(v,e),be)&&!ciclo_negativo(e,graph)) {		 
 			solParcial.pb(e);	 							// Agregar a la solucion parcial.
 			beneficioDisponible -= max(0,be-ce);
 			busqueda(graph);	
@@ -578,7 +581,7 @@ int mayor_ben_grafo(Graph *graph){
 	int r=0;
 	for(int i=0;i<(*graph)[0].size();i++){
 		for(int j=0;j<(*graph)[0].size();j++){
-			r += ((*graph)[i][j].value)/2;
+			r += (max(0,(*graph)[i][j].value - (*graph)[i][j].cost ))/2;
 		}
 	}
 	return r;
