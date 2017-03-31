@@ -16,12 +16,11 @@ def runInstances(source, dest):
 			err = 0
 			name = f.split(".")[0]
 			src = root + "\\" + f
-			dst = dest + "\\" + name +"-salida.txt"
 			print("Running: ", src)
 			# EJECUCION DEL ALGORITMO
 			t_start = time.time()
 			try:
-				subprocess.check_call([cCode, src, dest])
+				ganancia = os.system("PRPP.exe < " + src)
 			except:
 				err = 1 
 			t_diff 	= time.time() - t_start
@@ -29,10 +28,10 @@ def runInstances(source, dest):
 			if err == 1:
 				print("		Ocurrio un error ejecutando", src, "tiempo: ", t_diff)
 			else:
-				with open(dst, "r") as fp:
-					gain   = int(fp.readline().strip)
-					results[f] = [gain, t_diff]
-	return results
+				msj = f+"\t"+str(ganancia)+"\t"+str(t_diff)+"\n"
+				print(msj)
+				with open("resultados.txt",'a') as fp:
+					fp.write(msj)
 
 def readRef(refFile):
 	# Lee el archivo de referencias y lo almacena en un diccionario.
@@ -43,36 +42,16 @@ def readRef(refFile):
 		for line in ref:
 			l = line.split(",")
 			v0_ref = [int(l[7]),int(l[8])] 
-			instances[l[0]] = v0_ref
+			instances[l[0]+"NoRPP"] = v0_ref
+			print(l[0]+"NoRPP",v0_ref)
 	return instances
-
-def genTables(results, references, dest):
-	with open(dest, "w") as fp:
-		for k in results.keys():
-			Vo = references[k][0]
-			Vp = references[k][1]
-			Vh = results[k][0]
-			th = results[k][1]
-			if Vo != 0:
-				dp = (Vo - Vp)/Vo
-				dh = (Vo - Vh)/Vo
-				if dh >= 0:
-					msj = "%s %s %s %s\n" % (k,str(dp),str(dh),str(th))
-					fp.write(msj)
-					print(k, dp, dh, th)
-				else:
-					print("ERROR DIFERENCIA NEGATIVA EN ", k, " CON ", diffOpt)
-			else:
-				msj = "%s %s %s %s\n" % (k,str(dp),str(dh),str(th))
-				fp.write(msj)
-				print(k, Vp, Vh, th)
 
 #########################################
 #				VARIABLES				#			
 #########################################
 cwd		  = os.getcwd()
 cCode	  = cwd + "\PRPP.exe"
-insFolder = cwd + "\instanciasPRPP"
+insFolder = cwd + "\\instanciasPRPP\\instanciasPRPP"
 refFile   = cwd + "\\reference.txt"
 outFolder = cwd + "\output"
 tableFile = cwd + "\\tables.txt"
@@ -81,4 +60,4 @@ tableFile = cwd + "\\tables.txt"
 if __name__ == "__main__":
 	references = readRef(refFile)
 	results    = runInstances(insFolder, outFolder)
-	genTables(results, references, tableFile) 
+	#genTables(results, references, tableFile) 
