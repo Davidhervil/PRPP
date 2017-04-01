@@ -755,7 +755,7 @@ int main(){
 	}else{
 		//return max;
 		//cout<<max<<endl;
-		for(int i=0;i<path.size();i++)//cout<<path[i]<<' ';
+		//for(int i=0;i<path.size();i++)//cout<<path[i]<<' ';
 		//cout<<endl;
 		soltoedges = traducir(path,&graph);
 		bandb(&graph,soltoedges,max);
