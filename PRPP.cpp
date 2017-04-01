@@ -562,9 +562,9 @@ bool repite_ciclo(edge e){
 		int l2 = solParcial[i].v2;
 		if(l1==e.v2){
 			if(e.b-e.c<solParcial[i].b - solParcial[i].c){
-				return false;
-			}else{
 				return true;
+			}else{
+				return false;
 			}
 		}
 		//if(l2 == e.v2){
