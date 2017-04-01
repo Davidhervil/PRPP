@@ -40,6 +40,7 @@ int beneficioDisponible, mayorBen,countBusq;
 vector<edge> solParcial (1,edge(0,1,0,0));
 vector<edge> mejorSol;
 clock_t start, diff;
+double tiempo,eternidad=7980;
 
 vector<edge> traducir(vector<int> p,Graph *G){
 	int marked[110][110],total=0,last=p[0];
@@ -631,7 +632,10 @@ int busqueda(Graph *graph){
 	int s,b,b2,c,benef, ultimo, penultimo;							
 	edge e=solParcial.back(); // El vertice mas externo de la solucion parcial
 	// ALGORITMO
-					
+	diff = clock()-start;
+	tiempo = (double)diff / CLOCKS_PER_SEC;
+	if(tiempo >= eternidad)return 1;
+
 	if(e.v2 == 1){
 		//cout<<"SOLU"<<endl;								// Si llegamos al deposito.			
 		benef = profit(solParcial);	// Hallar beneficio actual (MEJORABLE)
@@ -677,7 +681,7 @@ int busqueda(Graph *graph){
 	}
 }
 
-int bandb(Graph *G, vector<edge> solInicial, int benInicial){
+void bandb(Graph *G, vector<edge> solInicial, int benInicial){
 	vector<edge> v (1,edge(0,1,0,0));
 	mejorSol = solInicial;
 	mayorBen = benInicial;
@@ -752,6 +756,7 @@ int main(){
 		//for(int i=0;i<final.size();i++)//cout<<final[i]<<' ';
 			//cout<<endl;
 		soltoedges = traducir(final,&graph);
+		start = clock();
 		bandb(&graph,soltoedges,ganancia);
 	}else{
 		//return max;
@@ -759,8 +764,10 @@ int main(){
 		//for(int i=0;i<path.size();i++)//cout<<path[i]<<' ';
 		//cout<<endl;
 		soltoedges = traducir(path,&graph);
+		start = clock();
 		bandb(&graph,soltoedges,max);
 	}
+	tiempo = diff / CLOCKS_PER_SEC;
 	return mayorBen;
 	//for(int i=0;i<graph[0].size();i++)//cout<<graph[10][i].second<<' ';
 }
