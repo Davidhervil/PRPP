@@ -4,7 +4,7 @@
 #include <vector>
 #include <string.h>
 #include <algorithm>
-#include <set>
+#include <ctime>
 
 #define cost first
 #define value second
@@ -38,6 +38,7 @@ class edge{
 int beneficioDisponible, mayorBen,countBusq;
 vector<edge> solParcial (1,edge(0,1,0,0));
 vector<edge> mejorSol;
+clock_t start, diff;
 
 vector<edge> traducir(vector<int> p,Graph *G){
 	int marked[110][110],total=0,last=p[0];
