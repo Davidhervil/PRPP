@@ -17,6 +17,7 @@
 using namespace std;
 typedef vector<pair<int,int> > connections;
 typedef vector<vector<pair <int,int> > > Graph;
+const clock_t begin_time = clock();
 class edge{
 	public:
 		int v1;
@@ -60,7 +61,7 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 	int visited[nodes+1],done[nodes+1];
 	int remain = nodes, verify = 1, comp = 0, node;
 	stack<int> stack;
-	//cout<<"Let's roll"<<endl;
+	////cout<<"Let's roll"<<endl;
 
 	(*conexComp).pb(vector<int> ());
 	memset(done,0,sizeof(done));
@@ -71,7 +72,7 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 			node = stack.top();
 			stack.pop();
 			if(!visited[node]){
-				//cout<<"Rolling"<<endl;
+				////cout<<"Rolling"<<endl;
 				(*conexComp)[comp].pb(node);
 				visited[node] = 1;
 				done[node] = 1;
@@ -86,22 +87,22 @@ void dfs(int s,Graph *graph,vector<vector<int> > *conexComp, int nodes){
 		while(verify<=nodes && done[verify]==1){
 			verify++;
 		}
-		//cout<<"Verifying"<<endl;
+		////cout<<"Verifying"<<endl;
 		if(verify<=nodes){
 			stack.push(verify);
-			//cout<<verify<<endl;
+			////cout<<verify<<endl;
 			(*conexComp).pb(vector<int> ());
 			comp++;
 		}
 	}
-	//cout<<"Rolled"<<endl;
+	////cout<<"Rolled"<<endl;
 }
 /* Esta funcion retorna 1 si el camino *prev es un ciclo
 */
 int infinite( vector<int> *prev,int from){
 	int i = from,cycle=0;
 	while((*prev)[i]!=-1){
-		//cout<<i<<' ';
+		////cout<<i<<' ';
 		i = (*prev)[i];
 		if(i==from){
 			cycle=1;
@@ -109,7 +110,7 @@ int infinite( vector<int> *prev,int from){
 		}
 	}
 	return cycle;
-	//cout<<i<<endl;
+	////cout<<i<<endl;
 }
 
 /* 	Procedimiento inspirado en el algoritmo de Bellman-Ford, que retorna
@@ -120,7 +121,7 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
 	int valid[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[s] = 0;
-	//cout<<"Empezando Bell"<<endl;
+	////cout<<"Empezando Bell"<<endl;
 	memset(valid,-1,sizeof(valid));
 	for (int node = 1; node <= nodes-1; node++)
 	{
@@ -133,8 +134,8 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
 					(*prev)[j] = i;
 					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost;
-						//cout<<"i "<<i<<' '<<distances[i]<<endl;
-						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						////cout<<"i "<<i<<' '<<distances[i]<<endl;
+						////cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = 0;
 						(*prev)[j] = i;
 					}else{
@@ -152,8 +153,8 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev){
 					(*prev)[j] = i;
 					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (*graph)[i][j].value-(*graph)[i][j].cost;
-						//cout<<"i "<<i<<' '<<distances[i]<<endl;
-						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						////cout<<"i "<<i<<' '<<distances[i]<<endl;
+						////cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = 0;
 						(*prev)[j] = i;
 					}else{
@@ -176,7 +177,7 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev, int (*inpa
 	int valid[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[s] = 0;
-	//cout<<"Empezando Bell"<<endl;
+	////cout<<"Empezando Bell"<<endl;
 	memset(valid,-1,sizeof(valid));
 	for (int node = 1; node <= nodes-1; node++)
 	{
@@ -206,8 +207,8 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev, int (*inpa
 					(*prev)[j] = i;
 					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (-(*inpaths)[i][j])*(*graph)[i][j].value-(*graph)[i][j].cost;
-						//cout<<"i "<<i<<' '<<distances[i]<<endl;
-						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						////cout<<"i "<<i<<' '<<distances[i]<<endl;
+						////cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = 0;
 						(*prev)[j] = i;
 					}else{
@@ -226,7 +227,7 @@ vector<int> bellman(int nodes,int s, Graph *graph, vector<int> *prev, int (*inpa
 void mark(int from, vector<int> *p,int (*inroad)[110][110] ){
 	int i = from,cycle=0;
 	while((*p)[i]!=-1){
-		//cout<<i<<' ';
+		////cout<<i<<' ';
 		if((*p)[i]!=-1)
 		(*inroad)[i][(*p)[i]] = (*inroad)[(*p)[i]][i] = 0; 
 		i = (*p)[i];
@@ -240,7 +241,7 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 	int valid[110][110],inroad[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[from] = 0;
-	//cout<<"Empezando Regreso"<<endl;
+	////cout<<"Empezando Regreso"<<endl;
 	memset(inroad,-1,sizeof(inroad));
 	mark(from,ida,&inroad);
 	memset(valid,-1,sizeof(valid));
@@ -255,8 +256,8 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 					(*prev)[j] = i;
 					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost;
-						//cout<<"i "<<i<<' '<<distances[i]<<endl;
-						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						////cout<<"i "<<i<<' '<<distances[i]<<endl;
+						////cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = inroad[i][j] = inroad[j][i]= 0;
 						(*prev)[j] = i;
 					}else{
@@ -275,8 +276,8 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 					(*prev)[j] = i;
 					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (-1)*inroad[i][j]*(*graph)[i][j].value-(*graph)[i][j].cost;
-						//cout<<"i "<<i<<' '<<distances[i]<<endl;
-						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						////cout<<"i "<<i<<' '<<distances[i]<<endl;
+						////cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = inroad[i][j] = inroad[j][i]= 0;
 						(*prev)[j] = i;
 					}else{
@@ -287,8 +288,8 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 			}
 		}
 	}
-	//for(int i=1;i<=nodes;i++)cout<<distances[i]<<' ';
-	//	cout<<endl;
+	//for(int i=1;i<=nodes;i++)//cout<<distances[i]<<' ';
+	//	//cout<<endl;
 	return distances;
 }
 /* 	Modificacion del procedimiento 'bellman' antes mencionado. Dado un camino parcial de ida
@@ -300,7 +301,7 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 	int valid[110][110],inroad[110][110],hold;
 	vector<int> distances(nodes+1,-INF);
 	distances[from] = 0;
-	//cout<<"Empezando Regreso"<<endl;
+	////cout<<"Empezando Regreso"<<endl;
 	memset(inroad,-1,sizeof(inroad));
 	mark(from,ida,&inroad);
 	memset(valid,-1,sizeof(valid));
@@ -315,8 +316,8 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 					(*prev)[j] = i;
 					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (-1)*inroad[i][j]*(-(*inpaths)[i][j])*(*graph)[i][j].value-(*graph)[i][j].cost;
-						//cout<<"i "<<i<<' '<<distances[i]<<endl;
-						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						////cout<<"i "<<i<<' '<<distances[i]<<endl;
+						////cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = inroad[i][j] = inroad[j][i]= 0;
 						(*prev)[j] = i;
 					}else{
@@ -335,8 +336,8 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 					(*prev)[j] = i;
 					if(!infinite(prev,i)){
 						distances[j] = distances[i] + (-1)*inroad[i][j]*(-(*inpaths)[i][j])*(*graph)[i][j].value-(*graph)[i][j].cost;
-						//cout<<"i "<<i<<' '<<distances[i]<<endl;
-						//cout<<"j "<<j<<' '<<distances[j]<<endl;
+						////cout<<"i "<<i<<' '<<distances[i]<<endl;
+						////cout<<"j "<<j<<' '<<distances[j]<<endl;
 						valid[i][j] = valid[j][i] = inroad[i][j] = inroad[j][i]= 0;
 						(*prev)[j] = i;
 					}else{
@@ -347,8 +348,8 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 			}
 		}
 	}
-	//for(int i=1;i<=nodes;i++)cout<<distances[i]<<' ';
-	//	cout<<endl;
+	//for(int i=1;i<=nodes;i++)//cout<<distances[i]<<' ';
+	//	//cout<<endl;
 	return distances;
 }
 
@@ -358,7 +359,7 @@ vector<int> regreso(int nodes,int from, Graph *graph, vector<int> *ida,vector<in
 vector<int> constructPath(vector<int> venida,vector<int> ida,int node){
 	vector<int> path;
 	int i = node;
-	//cout<<"Armando ciclo"<<endl;
+	////cout<<"Armando ciclo"<<endl;
 	path.pb(i);
 	i=venida[i];
 	while(i!=-1){
@@ -454,9 +455,9 @@ vector<vector<int> > mejorar(int nodes,Graph *graph, vector<int> *ida,vector<int
 void leprint (int nodes,int (*cR)[110][110]){
 	for(int i = 1;i<=nodes;i++){
 		for(int j=1; j<=nodes;j++){
-			cout<<(*cR)[i][j]<<' ';
+			//cout<<(*cR)[i][j]<<' ';
 		}
-		cout<<endl;
+		//cout<<endl;
 	}
 }
 /* Procedimiento que imprime en pantalla un camino parcial.
@@ -464,10 +465,10 @@ void leprint (int nodes,int (*cR)[110][110]){
 void printpath(vector<int> prv, int max){
 	int i = max;
 	while(prv[i]!=-1){
-		cout<<i<<' ';
+		//cout<<i<<' ';
 		i = prv[i];
 	}
-	cout<<i<<endl;
+	//cout<<i<<endl;
 }
 /* 	Procedimiento que anhade las posibles mejoras  encontradas
 	a la solucion proveida
@@ -632,16 +633,16 @@ int busqueda(Graph *graph){
 	// ALGORITMO
 					
 	if(e.v2 == 1){
-		cout<<"SOLU"<<endl;								// Si llegamos al deposito.			
+		//cout<<"SOLU"<<endl;								// Si llegamos al deposito.			
 		benef = profit(solParcial);	// Hallar beneficio actual (MEJORABLE)
-		for(int i=0;i<solParcial.size();i++)cout<<solParcial[i].v1<<'-'<<solParcial[i].v2<<' ';
-		cout<<endl<<"mayor: "<<mayorBen<<"   "<<endl;
-		cout<<"Disponible: "<<beneficioDisponible<<"   "<<endl;
-		cout<<"Beneficio: "<<benef<<"   "<<endl;
+		//for(int i=0;i<solParcial.size();i++)//cout<<solParcial[i].v1<<'-'<<solParcial[i].v2<<' ';
+		//cout<<endl<<"mayor: "<<mayorBen<<"   "<<endl;
+		//cout<<"Disponible: "<<beneficioDisponible<<"   "<<endl;
+		//cout<<"Beneficio: "<<benef<<"   "<<endl;
 		if (benef > mayorBen){				// Reasignar mejor solucion
 			mejorSol = solParcial;			// Guardar mejor camino.
 			mayorBen = benef;				// Hallar beneficio actual
-			cout<<"modifique"<<endl;
+			//cout<<"modifique"<<endl;
 		}							
 	}
 	for(int i=1;i<(*graph)[e.v2].size();i++){	// Crear lista de sucesores
@@ -653,8 +654,8 @@ int busqueda(Graph *graph){
 		}
 	}
 	sort(sucesores.begin(), sucesores.end(), comparador);	// Ordenar sucesores de mayor a menor.
-	//for(int i=0;i<sucesores.size();i++)cout<<sucesores[i].first<<","<<sucesores[i].second<<' ';
-	//cout<<endl;
+	//for(int i=0;i<sucesores.size();i++)//cout<<sucesores[i].first<<","<<sucesores[i].second<<' ';
+	////cout<<endl;
 	benef = profit(solParcial);
 	for(int i=0; i<sucesores.size(); i++){					// Recorrer desde el ultimo.
 		e  = sucesores[i];									// Aqui esta el nodo a verificar (Bueno, la arista)
@@ -667,8 +668,8 @@ int busqueda(Graph *graph){
 				busqueda(graph);
 		}
 	}
-	//for(int i=0;i<solParcial.size();i++)cout<<solParcial[i]<<' ';
-	//cout<<endl;
+	//for(int i=0;i<solParcial.size();i++)//cout<<solParcial[i]<<' ';
+	////cout<<endl;
 	if (solParcial.size()!=0){					// Si hay elementos en el camino.
 		e = solParcial.back();
 		beneficioDisponible += max(0,e.b-e.c);	// Aumentar el beneficio disponible.
@@ -682,10 +683,10 @@ int bandb(Graph *G, vector<edge> solInicial, int benInicial){
 	mayorBen = benInicial;
 	beneficioDisponible = mayor_ben_grafo(G);		///// ??????
 	busqueda(G);										///// ??????
-	cout<<"chao busqueda"<<endl;
-	cout<<mayorBen<<endl;
-	for(int i=0;i<mejorSol.size();i++)cout<<mejorSol[i].v1<<'-'<<mejorSol[i].v2<<' ';
-		cout<<endl;
+	//cout<<"chao busqueda"<<endl;
+	//cout<<mayorBen<<endl;
+	//for(int i=0;i<mejorSol.size();i++)//cout<<mejorSol[i].v1<<'-'<<mejorSol[i].v2<<' ';
+		//cout<<endl;
 }
 
 
@@ -744,21 +745,22 @@ int main(){
 
 	// dar resultados
 	ganancia = profit(final,&graph);
-	//for(int i=0;i<path.size();i++)cout<<path[i]<<' ';
+	//for(int i=0;i<path.size();i++)//cout<<path[i]<<' ';
 	if(ganancia>max){
 		//return ganancia;
-		cout<<ganancia<<endl;
-		for(int i=0;i<final.size();i++)cout<<final[i]<<' ';
-			cout<<endl;
+		//cout<<ganancia<<endl;
+		//for(int i=0;i<final.size();i++)//cout<<final[i]<<' ';
+			//cout<<endl;
 		soltoedges = traducir(final,&graph);
 		bandb(&graph,soltoedges,ganancia);
 	}else{
 		//return max;
-		cout<<max<<endl;
-		for(int i=0;i<path.size();i++)cout<<path[i]<<' ';
-		cout<<endl;
+		//cout<<max<<endl;
+		//for(int i=0;i<path.size();i++)//cout<<path[i]<<' ';
+		//cout<<endl;
 		soltoedges = traducir(path,&graph);
 		bandb(&graph,soltoedges,max);
 	}
-	//for(int i=0;i<graph[0].size();i++)cout<<graph[10][i].second<<' ';
+	return mayorBen;
+	//for(int i=0;i<graph[0].size();i++)//cout<<graph[10][i].second<<' ';
 }
