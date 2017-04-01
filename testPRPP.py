@@ -2,6 +2,9 @@ import os
 import subprocess
 import time
 
+optimos = {}
+
+
 #########################################
 #				FUNCIONES				#
 #########################################
@@ -28,7 +31,11 @@ def runInstances(source, dest):
 			if err == 1:
 				print("		Ocurrio un error ejecutando", src, "tiempo: ", t_diff)
 			else:
-				msj = f+"\t"+str(ganancia)+"\t"+str(t_diff)+"\n"
+				if optimos[f] != 0:
+					desviacion = 100*(optimos[f] - ganancia)/optimos[f]							# Calcular la desviacion estandar
+				else:
+					desviacion = 0
+				msj = f + "\t" + str(optimos[f]) + "\t" + str(ganancia) + "\t" + str(desviacion) + "\t" + str(t_diff) + "\n"	# 
 				print(msj)
 				with open("resultados.txt",'a') as fp:
 					fp.write(msj)
@@ -36,28 +43,22 @@ def runInstances(source, dest):
 def readRef(refFile):
 	# Lee el archivo de referencias y lo almacena en un diccionario.
 	# El diccionario es instances[name] = [Vo, Aprox]
-	instances = {}
-	i = -1
-	with open(refFile, "r") as ref:
-		for line in ref:
-			l = line.split(",")
-			v0_ref = [int(l[7]),int(l[8])] 
-			instances[l[0]+"NoRPP"] = v0_ref
-			print(l[0]+"NoRPP",v0_ref)
-	return instances
+	with open("referencia.txt","r") as fp:
+		for line in fp:
+			l = line.split('\t')
+			name = l[0] + "NoRPP"
+			Vopt = l[7]
+			optimos[name] = int(Vopt)
 
 #########################################
 #				VARIABLES				#			
 #########################################
 cwd		  = os.getcwd()
 cCode	  = cwd + "\PRPP.exe"
-insFolder = cwd + "\\instanciasPRPP\\instanciasPRPP"
+insFolder = cwd + "\\instancias"
 refFile   = cwd + "\\reference.txt"
-outFolder = cwd + "\output"
-tableFile = cwd + "\\tables.txt"
 #########################################
 
 if __name__ == "__main__":
 	references = readRef(refFile)
 	results    = runInstances(insFolder, outFolder)
-	#genTables(results, references, tableFile) 
