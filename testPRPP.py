@@ -9,7 +9,7 @@ optimos = {}
 #				FUNCIONES				#
 #########################################
 
-def runInstances(source, dest):
+def runInstances(source):
 	# EL ALGORITMO DE C++ Recibe el archivo
 	# Tambien recibe el archivo en el que escribira la salida
 	# Devuelve la ganancia obtenida por el algoritmo.
@@ -61,4 +61,4 @@ refFile   = cwd + "\\reference.txt"
 
 if __name__ == "__main__":
 	references = readRef(refFile)
-	results    = runInstances(insFolder, outFolder)
+	results    = runInstances(insFolder)
