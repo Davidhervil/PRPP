@@ -663,6 +663,9 @@ int busqueda(Graph *graph){
 	benef = profit(solParcial);
 	for(int i=0; i<sucesores.size(); i++){					// Recorrer desde el ultimo.
 		e  = sucesores[i];									// Aqui esta el nodo a verificar (Bueno, la arista)
+		diff = clock()-start;
+		tiempo = (double)diff / CLOCKS_PER_SEC;
+		if(tiempo >= eternidad)return 1;
 		if((cumple_acota(e,benef) &&						// Verificaciones.
 			!ciclo_negativo(e) &&
 			!repite_ciclo(e) &&
@@ -767,7 +770,7 @@ int main(){
 		start = clock();
 		bandb(&graph,soltoedges,max);
 	}
-	tiempo = diff / CLOCKS_PER_SEC;
+	cout<<tiempo<<endl;
 	return mayorBen;
 	//for(int i=0;i<graph[0].size();i++)//cout<<graph[10][i].second<<' ';
 }
